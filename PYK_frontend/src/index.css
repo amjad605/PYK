@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --fluid-sm: 1.5rem; /* 16px */
+  --fluid-lg: 2.5rem; /* 40px */
+
+  --color-blue: #1f6bff;
+  --color-blue-800: #184198;
+  --color-blue-700: #1a5bc4;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #1f6bff;
+  --color-secondary: #4d91ff;
+  --color-dark: #011a42;
+  --color-gray: #515151;
+  --color-light-gray: #aaaaaa;
+  --color-black: #000000;
+  --color-white: #ffffff;
+}
+@layer base {
+  /* Apply fluid typography directly to semantic tags */
+  h1 {
+    @apply font-extrabold leading-tight text-gray-900;
+    font-size: clamp(2.5rem, 1.5rem + 2vw, 4rem); /* 40px → 64px */
+  }
+
+  h2 {
+    @apply font-bold leading-snug text-gray-900;
+    font-size: clamp(2rem, 1.2rem + 1.5vw, 3rem); /* 32px → 48px */
+  }
+
+  h3 {
+    @apply font-semibold leading-snug text-gray-900;
+    font-size: clamp(1.75rem, 1rem + 1vw, 2.5rem); /* 28px → 40px */
+  }
+
+  h4 {
+    @apply font-semibold leading-snug text-gray-900;
+    font-size: clamp(1.5rem, 0.9rem + 0.8vw, 2rem); /* 24px → 32px */
+  }
+
+  h5 {
+    @apply font-medium leading-snug text-gray-900;
+    font-size: clamp(1.25rem, 0.8rem + 0.5vw, 1.75rem); /* 20px → 28px */
+  }
+
+  h6 {
+    @apply font-medium leading-snug uppercase tracking-wide text-gray-900;
+    font-size: clamp(1rem, 0.7rem + 0.3vw, 1.25rem); /* 16px → 20px */
+  }
+
+  p {
+    @apply text-gray-700;
+    font-size: clamp(1rem, 0.9rem + 0.3vw, 1.125rem); /* 16px → 18px */
+    line-height: 1.6;
+  }
+
+  small {
+    @apply text-gray-500;
+    font-size: clamp(0.8rem, 0.7rem + 0.2vw, 0.9rem); /* 13px → 14.5px */
+  }
+}
+
+@layer utilities {
+  /* Optional: utility classes if you want explicit "fluid-*" */
+  .fluid-h1 {
+    @apply font-extrabold leading-tight;
+    font-size: clamp(2.5rem, 1.5rem + 2vw, 4rem);
+  }
+  .fluid-h2 {
+    @apply font-bold leading-snug;
+    font-size: clamp(2rem, 1.2rem + 1.5vw, 3rem);
+  }
+  .fluid-h3 {
+    @apply font-semibold leading-snug;
+    font-size: clamp(1.75rem, 1rem + 1vw, 2.5rem);
+  }
+  .fluid-h4 {
+    @apply font-semibold leading-snug;
+    font-size: clamp(1.5rem, 0.9rem + 0.8vw, 2rem);
+  }
+  .fluid-h5 {
+    @apply font-medium leading-snug;
+    font-size: clamp(1.25rem, 0.8rem + 0.5vw, 1.75rem);
+  }
+  .fluid-h6 {
+    @apply font-medium leading-snug uppercase tracking-wide;
+    font-size: clamp(1rem, 0.7rem + 0.3vw, 1.25rem);
+  }
+  .fluid-p {
+    @apply text-gray-400;
+    font-size: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);
+    line-height: 1.6;
+  }
+  .fluid-small {
+    @apply text-gray-500;
+    font-size: clamp(0.8rem, 0.7rem + 0.2vw, 0.9rem);
+  }
+}
