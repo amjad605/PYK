@@ -1,16 +1,22 @@
 import React from "react";
 import { Heart, MapPin, Bed, Bath, Square } from "lucide-react";
 import { type Property } from "./PropertyCard.type";
+import { useNavigate } from "react-router-dom";
 
 interface PropertyCardProps {
   property: Property;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate(`/property/${property.id}`);
+  };
   return (
     <div
+      onClick={handleClick}
       key={property.id}
-      className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden group hover:shadow-lg transition"
+      className="bg-white rounded-2xl mx-4 md:mx-0 shadow-md border border-gray-200 overflow-hidden group hover:shadow-lg transition"
     >
       {/* Image with Favorite Button */}
       <div className="relative overflow-hidden">

@@ -1,22 +1,13 @@
-import {
-  MapPin,
-  Home,
-  DollarSign,
-  Bed,
-  Bath,
-  ChefHat,
-  ChevronDown,
-} from "lucide-react";
 import Nav from "../components/common/Nav";
 
-import cozyVilla from "../assets/cozy-family-duplex.png";
 import modernvilla from "../assets/modern-villa-with-pool.png";
-import luxuryApartment from "../assets/luxury-downtown-apartment.png";
 
 import PropertyCard from "../components/property/PropertyCard";
-import bg from "../assets/Sunlit Urban Facade.png";
+
+import bg2 from "../assets/IMG_4024.jpg";
 import { useState } from "react";
-import { PropertyFilterCard } from "../components/property/FilterCard";
+
+import FiltersCard from "@/components/property/FiltersCard";
 interface Property {
   id: number;
   title: string;
@@ -107,6 +98,7 @@ export default function SellPage() {
       category: "resale",
     },
   ];
+  const [filters, setFilters] = useState<Record<string, unknown>>({});
   const [filteredProperties, setFilteredProperties] = useState<
     Property[] | null
   >(null);
@@ -157,18 +149,16 @@ export default function SellPage() {
     <div className="min-h-screen bg-stone-50">
       {/* Hero Section */}
       <div
-        className="relative  bg-black bg-center"
-        style={
-          {
-            // backgroundImage: `url("${bg}")`,
-          }
-        }
+        className="relative  bg-cover bg-center"
+        style={{
+          backgroundImage: `url("${bg2}")`,
+        }}
       >
         <Nav />
 
         {/* Search Bar */}
-        <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 lg:px-8 top-[300px]  transform -translate-y-1/2  ">
-          <PropertyFilterCard onFilterChange={handleFilterChange} />
+        <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 lg:px-8 top-30 ">
+          <FiltersCard listingType="rent" />
         </div>
       </div>
 

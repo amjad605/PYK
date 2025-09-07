@@ -3,7 +3,6 @@
 import type React from "react";
 import { useState, useCallback } from "react";
 import { DollarSign } from "lucide-react";
-import PriceRangeDropdown from "./PriceRangeDropdown";
 
 interface FilterState {
   location: string;

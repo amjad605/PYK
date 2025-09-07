@@ -4,7 +4,7 @@ import img1 from "../../assets/Modern Glass Architecture.png";
 import img2 from "../../assets/Modern Architectural Entrance.png";
 import img3 from "../../assets/Modern Chic Apartment Interior.png";
 import img4 from "../../assets/Modern House at Twilight.png";
-
+import { motion } from "framer-motion";
 const categories = [
   {
     category: "primary" as const,
@@ -99,7 +99,13 @@ const RealEstateCategorySection: React.FC = () => {
     <section className="py-12 px-4 bg-[var(--color-surface,#f9fafb)]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="text-center mb-8 md:mb-12"
+        >
           <h2 className="fluid-h2 font-bold text-[var(--color-text,#111827)] mb-2">
             Find Your Perfect Property
           </h2>
@@ -107,7 +113,7 @@ const RealEstateCategorySection: React.FC = () => {
             Explore our curated selection of properties across different
             categories to find your ideal home or investment.
           </p>
-        </div>
+        </motion.div>
 
         {/* MOBILE slider */}
         <div className="md:hidden relative">
@@ -155,9 +161,24 @@ const RealEstateCategorySection: React.FC = () => {
         </div>
 
         {/* DESKTOP grid */}
-        <div className="hidden md:flex md:flex-wrap md:justify-center md:gap-8 mt-6">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{
+            opacity: 1,
+            transition: { staggerChildren: 2 }, // cards appear one by one
+          }}
+          viewport={{ once: true }}
+          className="hidden md:flex md:flex-wrap md:justify-center md:gap-8 mt-6"
+        >
           {categories.map((c) => (
-            <div key={c.category} className="w-[320px]">
+            <motion.div
+              initial={{ opacity: 0, y: 90 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              viewport={{ once: true }}
+              key={c.category}
+              className="w-[320px]"
+            >
               <RealEstateCategoryCard
                 category={c.category}
                 title={c.title}
@@ -165,9 +186,9 @@ const RealEstateCategorySection: React.FC = () => {
                 imageUrl={c.imageUrl}
                 onViewListings={() => handleViewListings(c.category)}
               />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
