@@ -1,4 +1,4 @@
-import React from "react";
+import { motion } from "framer-motion";
 import FloatingStateCard from "../common/FloatingStateCard";
 import realEstateTeam from "../../assets/professional-real-estate-team.png";
 function ChooseUs() {
@@ -38,7 +38,18 @@ function ChooseUs() {
                     "From property search to closing, we handle every detail of your journey.",
                 },
               ].map((feature, index) => (
-                <div key={index} className="flex items-start space-x-4">
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -60 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    ease: "easeOut",
+                    delay: index * 0.4,
+                  }}
+                  viewport={{ once: true }}
+                  className="flex items-start space-x-4"
+                >
                   <div className="bg-blue-100 rounded-full p-2 mt-1">
                     <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   </div>
@@ -50,7 +61,7 @@ function ChooseUs() {
                       {feature.description}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

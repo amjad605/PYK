@@ -21,6 +21,7 @@ const CompanyMap: React.FC = () => {
   return (
     <div className="w-full h-80 rounded-2xl shadow-md overflow-hidden">
       <MapContainer
+        scrollWheelZoom={false}
         attributionControl={false}
         center={companyLocation}
         zoom={15}

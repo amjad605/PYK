@@ -1,43 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, ChevronDown, DollarSign } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
 
 interface PriceRangeFilterProps {
   value: [number, number];
-  onChange: (range: [number, number]) => void;
+  onChange: (range: [number | null, number | null]) => void;
   min?: number;
   max?: number;
   step?: number;
+  isFirstRender: boolean;
+  setIsFirstRender: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
   value,
   onChange,
-  min = 500,
-  max = 10000,
-  step = 100,
+  min = 50000,
+  max = 25000000,
+  step = 10000,
+  isFirstRender,
+  setIsFirstRender,
 }) => {
   const [open, setOpen] = useState(false);
+  const [tempValue, setTempValue] = useState<[number, number]>([min, max]);
+
+  const formatPrice = (price: number) => {
+    if (price >= 1000000) {
+      return `EGP ${(price / 1000000).toFixed(1)}M`;
+    }
+    return `EGP ${price.toLocaleString()}`;
+  };
+
+  const applyFilter = () => {
+    onChange(tempValue);
+    setOpen(false);
+    setIsFirstRender(false);
+  };
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       {/* Trigger Button */}
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <DollarSign className="h-3.5 w-3.5 mr-1" />
-        PRICE RANGE
-      </p>
-
       <Button
         variant="outline"
-        onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-16 bg-gray-50   transition"
+        onClick={() => {
+          setTempValue(value); // كل مرة يفتح يرجّع القيم الحالية
+          setOpen(!open);
+        }}
+        className="flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-14 bg-gray-50 transition w-full"
       >
-        <span className="text-gray-700 text-sm">
-          {value[0] && value[1]
-            ? `$${value[0]} - $${value[1]}`
+        <span
+          className={`${
+            !isFirstRender ? "text-gray-700" : "text-gray-400"
+          } font-medium text-sm`}
+        >
+          {!isFirstRender
+            ? `${formatPrice(value[0])} - ${formatPrice(value[1])}`
             : "Select Price Range"}
         </span>
         <ChevronDown
@@ -46,43 +66,57 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
           }`}
         />
       </Button>
+
       {/* Dropdown */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-4 space-y-3">
+        <div className="absolute mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-4 space-y-3 w-72">
           <div className="flex items-center gap-2">
             <input
               type="number"
-              value={value[0]}
-              onChange={(e) => onChange([+e.target.value, value[1]])}
-              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              value={tempValue[0] ?? 0}
+              onChange={(e) =>
+                setTempValue([+e.target.value, tempValue[1] ?? 0])
+              }
+              className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Min"
             />
             <span className="text-gray-400">-</span>
             <input
               type="number"
-              value={value[1]}
-              onChange={(e) => onChange([value[0], +e.target.value])}
-              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              value={tempValue[1] ?? 25000000}
+              onChange={(e) =>
+                setTempValue([tempValue[0] ?? 0, +e.target.value])
+              }
+              className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Max"
             />
-            <SlidersHorizontal className="w-4 h-4 text-gray-500" />
           </div>
 
           {/* Slider */}
           <Slider
             min={min}
-            max={max}
+            max={25000000}
             step={step}
-            value={value}
-            onValueChange={(newValue) => onChange([newValue[0], newValue[1]])}
+            value={tempValue}
+            onValueChange={(newValue) =>
+              setTempValue([newValue[0], newValue[1]])
+            }
             className="w-full py-3"
           />
 
           {/* Values */}
           <div className="flex justify-between text-xs text-gray-500">
-            <span>${min}</span>
-            <span>${max}</span>
+            <span>{formatPrice(min)}</span>
+            <span>{formatPrice(max)}</span>
           </div>
+
+          {/* Apply Button */}
+          <Button
+            onClick={applyFilter}
+            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+          >
+            Apply
+          </Button>
         </div>
       )}
     </div>

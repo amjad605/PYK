@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
   DrawerTrigger,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 
 import { PropertyTypeDropdown } from "./PropertyTypeDropDown";
 import { FacilitiesDropdown } from "./FacilitiesDropdown";
@@ -23,178 +23,219 @@ import { FurnishingDropdown } from "./FurnishingDropdown";
 import { ContractDurationDropdown } from "./ContractDurationDropdown";
 
 export type ListingType = "primary" | "resale" | "rent";
-type PropertyType = "Apartment" | "House" | "Villa" | "Condo" | "Townhouse";
 
 interface FiltersCardProps {
-  listingType: string;
+  listingType: string | undefined;
+  filters: Record<string, any>;
+  setFilters: (filters: Record<string, any>) => void;
+  onApply: () => void;
 }
 
-export default function FiltersCard({ listingType }: FiltersCardProps) {
-  const [propertyType, setPropertyType] = useState<PropertyType | "">("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([1000, 5000]);
-  const [rooms, setRooms] = useState<number | null>(null);
-  const [bathrooms, setBathrooms] = useState<number | null>(null);
-  const [areaRange, setAreaRange] = useState<[number, number]>([1000, 5000]);
-  const [facilities, setFacilities] = useState<string[]>([]);
-  const [location, setLocation] = useState<string | null>("");
-  const [furnishing, setFurnishing] = useState<string | null>("");
-  const [contractDuration, setContractDuration] = useState<string | null>(null);
+export default function FiltersCard({
+  listingType,
+  filters,
+  setFilters,
+  onApply,
+}: FiltersCardProps) {
+  const [showMore, setShowMore] = useState(false);
+  const [keyword, setKeyword] = useState(filters.keyword || "");
+  const [isFirstRenderPrice, setIsFirstRenderPrice] = useState(true);
+  const [isFirstRenderArea, setIsFirstRenderArea] = useState(true);
+  // debounce for keyword
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (keyword !== filters.keyword) {
+        setFilters({ ...filters, keyword });
+        onApply();
+      }
+    }, 800);
 
-  const handleApply = () => {
-    const filters = {
-      listingType,
-      propertyType,
-      priceRange,
-      rooms,
-      bathrooms,
-      areaRange,
-      facilities,
-      furnishing,
-      contractDuration,
-    };
-    console.log("Applied Filters:", filters);
-  };
+    return () => clearTimeout(handler);
+  }, [keyword]);
 
   const clearAll = () => {
-    setPropertyType("");
-    setLocation(null);
-    setPriceRange([1000, 5000]);
-    setRooms(null);
-    setBathrooms(null);
-    setFacilities([]);
-    setFurnishing(null);
-    setContractDuration(null);
+    setFilters({
+      propertyType: "",
+      location: null,
+      priceRange: [500000, 25000000],
+      areaRange: [100, 5000],
+      rooms: null,
+      bathrooms: null,
+      facilities: [],
+      furnishing: null,
+      contractDuration: null,
+      keyword: "",
+      page: 1,
+      limit: 9,
+    });
+    setIsFirstRenderPrice(true);
+    setIsFirstRenderArea(true);
   };
 
   const egyptLocations: Record<string, string[]> = {
-    Cairo: ["Nasr City", "Heliopolis", "Maadi", "Fifth Settlement", "Zamalek"],
+    Cairo: [
+      "Nasr City",
+      "Heliopolis",
+      "Maadi",
+      "Fifth Settlement",
+      "New Cairo",
+      "Zamalek",
+    ],
     Giza: ["Dokki", "Mohandessin", "October City", "Sheikh Zayed", "Haram"],
     Alexandria: ["Smouha", "Stanley", "Gleem", "Miami", "Montaza"],
-  };
-
-  const renderFilters = () => {
-    const commonFilters = (
-      <>
-        <LocationDropdown
-          location={location}
-          setLocation={setLocation}
-          egyptLocations={egyptLocations}
-        />
-        <PropertyTypeDropdown
-          propertyType={propertyType}
-          setPropertyType={setPropertyType}
-          clearFilter={() => setPropertyType("")}
-        />
-        <AreaRangeFilter
-          value={areaRange}
-          onChange={setAreaRange}
-          min={1000}
-          max={5000}
-          step={100}
-        />
-        <PriceRangeFilter
-          value={priceRange}
-          onChange={setPriceRange}
-          min={1000}
-          max={5000}
-          step={100}
-        />
-        <BedsBathsDropdown
-          rooms={rooms}
-          bathrooms={bathrooms}
-          setRooms={setRooms}
-          setBathrooms={setBathrooms}
-        />
-      </>
-    );
-
-    if (listingType === "primary") {
-      return (
-        <>
-          {commonFilters}
-          <FacilitiesDropdown
-            facilities={facilities}
-            setFacilities={setFacilities}
-          />
-        </>
-      );
-    }
-
-    if (listingType === "resale") {
-      return (
-        <>
-          {commonFilters}
-          <FacilitiesDropdown
-            facilities={facilities}
-            setFacilities={setFacilities}
-          />
-        </>
-      );
-    }
-
-    if (listingType === "rent") {
-      return (
-        <>
-          {commonFilters}
-          <BedsBathsDropdown
-            rooms={rooms}
-            bathrooms={bathrooms}
-            setRooms={setRooms}
-            setBathrooms={setBathrooms}
-          />
-          <FurnishingDropdown value={furnishing} setValue={setFurnishing} />
-          <ContractDurationDropdown
-            value={contractDuration}
-            setValue={setContractDuration}
-          />
-        </>
-      );
-    }
   };
 
   return (
     <>
       {/* Desktop */}
-      <div className="hidden lg:block">
-        <Card className="w-full max-w-7xl mx-auto shadow-sm border border-gray-100 rounded-2xl p-5 bg-white">
-          <CardHeader className="p-0 pb-4">
+      <div className="hidden lg:block ">
+        <Card className="w-full mx-auto shadow-sm border border-gray-100 rounded-2xl  p-6 bg-white">
+          <CardHeader className="p-0 pb-4 flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
               <SlidersHorizontal className="h-5 w-5 mr-2 text-blue-600" />
               Refine Your Search
             </CardTitle>
+            <button
+              onClick={clearAll}
+              className="text-sm px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition text-gray-600"
+            >
+              Clear
+            </button>
           </CardHeader>
 
-          <div className="grid grid-cols-4 gap-4">{renderFilters()}</div>
+          <div className="flex w-full gap-3 items-center">
+            {/* keyword input */}
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-4 w-[90%] bg-gray-50">
+              <Search className="h-4 w-4 text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search by  Developer / Compound / Location / Keyword..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setFilters({ ...filters, keyword });
+                  }
+                }}
+                className="w-full bg-transparent text-sm outline-none"
+              />
+            </div>
 
-          <div className="mt-6 flex justify-end gap-3">
+            <LocationDropdown
+              location={filters.location}
+              setLocation={(location) => setFilters({ ...filters, location })}
+              egyptLocations={egyptLocations}
+            />
+            <PropertyTypeDropdown
+              propertyType={filters.propertyType}
+              setPropertyType={(propertyType) => {
+                setFilters({ ...filters, propertyType });
+                onApply();
+              }}
+              clearFilter={() => setFilters({ ...filters, propertyType: "" })}
+            />
+            <PriceRangeFilter
+              value={filters.priceRange}
+              onChange={(priceRange) => setFilters({ ...filters, priceRange })}
+              min={500000}
+              max={25000000}
+              step={100}
+              isFirstRender={isFirstRenderPrice}
+              setIsFirstRender={setIsFirstRenderPrice}
+            />
+
+            {/* Toggle More Filters */}
             <Button
-              variant="ghost"
-              onClick={clearAll}
-              className="rounded-lg text-gray-600 hover:text-gray-900 bg-gray-100 px-6 py-3"
+              variant="outline"
+              onClick={() => setShowMore(!showMore)}
+              className="rounded-lg flex items-center gap-2 text-sm"
             >
-              Clear All
-            </Button>
-            <Button
-              onClick={handleApply}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-3"
-            >
-              Apply Filters
+              {showMore ? (
+                <>
+                  <X className="h-4 w-4" /> Hide Filters
+                </>
+              ) : (
+                <>
+                  <SlidersHorizontal className="h-4 w-4" /> More Filters
+                </>
+              )}
             </Button>
           </div>
+
+          {showMore && (
+            <div className="mt-5 grid grid-cols-4 gap-4">
+              <BedsBathsDropdown
+                rooms={filters.rooms}
+                bathrooms={filters.bathrooms}
+                setRooms={(rooms) => setFilters({ ...filters, rooms })}
+                setBathrooms={(bathrooms) =>
+                  setFilters({ ...filters, bathrooms })
+                }
+              />
+              <AreaRangeFilter
+                value={filters.areaRange}
+                onChange={(areaRange) => setFilters({ ...filters, areaRange })}
+                min={1000}
+                max={5000}
+                step={100}
+                isFirstRender={isFirstRenderArea}
+                setIsFirstRender={setIsFirstRenderArea}
+              />
+              <FacilitiesDropdown
+                facilities={filters.facilities}
+                setFacilities={(facilities) =>
+                  setFilters({ ...filters, facilities })
+                }
+              />
+              <FurnishingDropdown
+                value={filters.furnishing}
+                setValue={(furnishing) =>
+                  setFilters({ ...filters, furnishing })
+                }
+              />
+              {listingType === "rent" && (
+                <>
+                  <ContractDurationDropdown
+                    value={filters.contractDuration}
+                    setValue={(contractDuration) =>
+                      setFilters({ ...filters, contractDuration })
+                    }
+                  />
+                </>
+              )}
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Mobile */}
+      {/* Mobile (unchanged) */}
       <div className="lg:hidden w-full px-4">
         <Drawer>
-          <DrawerTrigger asChild>
-            <Button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg py-3">
-              <SlidersHorizontal className="h-5 w-5" />
-              Filters
-            </Button>
-          </DrawerTrigger>
-
-          <DrawerContent className="flex flex-col h-[85vh] rounded-t-2xl p-4">
+          <div className="flex gap-2 ">
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-4 w-[90%] bg-gray-50">
+              <Search className="h-4 w-4 text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search by Developer/Compound/Location/Keyword..."
+                value={keyword}
+                onChange={(e) => {
+                  setKeyword(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setFilters({ ...filters, keyword });
+                  }
+                }}
+                className="w-full bg-transparent text-[10px] outline-none"
+              />
+            </div>
+            <DrawerTrigger asChild>
+              <Button className="flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg mx-auto h-14 w-14">
+                <SlidersHorizontal className="h6 w-6 " />
+              </Button>
+            </DrawerTrigger>
+          </div>
+          <DrawerContent className="flex flex-col h-[45vh] rounded-t-2xl p-4">
             <DrawerHeader>
               <DrawerTitle className="text-lg font-semibold">
                 Refine Your Search
@@ -202,7 +243,65 @@ export default function FiltersCard({ listingType }: FiltersCardProps) {
             </DrawerHeader>
 
             <div className="flex-1 overflow-y-auto grid grid-cols-1 gap-4 py-4">
-              {renderFilters()}
+              <LocationDropdown
+                location={filters.location}
+                setLocation={(location) => setFilters({ ...filters, location })}
+                egyptLocations={egyptLocations}
+              />
+              <PropertyTypeDropdown
+                propertyType={filters.propertyType}
+                setPropertyType={(propertyType) =>
+                  setFilters({ ...filters, propertyType })
+                }
+                clearFilter={() => setFilters({ ...filters, propertyType: "" })}
+              />
+              <BedsBathsDropdown
+                rooms={filters.rooms}
+                bathrooms={filters.bathrooms}
+                setRooms={(rooms) => setFilters({ ...filters, rooms })}
+                setBathrooms={(bathrooms) =>
+                  setFilters({ ...filters, bathrooms })
+                }
+              />
+              <FacilitiesDropdown
+                facilities={filters.facilities}
+                setFacilities={(facilities) =>
+                  setFilters({ ...filters, facilities })
+                }
+              />
+              <AreaRangeFilter
+                value={filters.areaRange}
+                onChange={(areaRange) => setFilters({ ...filters, areaRange })}
+                min={1000}
+                max={5000}
+                step={100}
+              />
+              <PriceRangeFilter
+                value={filters.priceRange}
+                onChange={(priceRange) =>
+                  setFilters({ ...filters, priceRange })
+                }
+                min={1000}
+                max={5000}
+                step={100}
+              />
+
+              {listingType === "rent" && (
+                <>
+                  <FurnishingDropdown
+                    value={filters.furnishing}
+                    setValue={(furnishing) =>
+                      setFilters({ ...filters, furnishing })
+                    }
+                  />
+                  <ContractDurationDropdown
+                    value={filters.contractDuration}
+                    setValue={(contractDuration) =>
+                      setFilters({ ...filters, contractDuration })
+                    }
+                  />
+                </>
+              )}
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row gap-3">
@@ -213,14 +312,7 @@ export default function FiltersCard({ listingType }: FiltersCardProps) {
               >
                 Clear All
               </Button>
-              <DrawerClose asChild>
-                <Button
-                  onClick={handleApply}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3"
-                >
-                  Apply Filters
-                </Button>
-              </DrawerClose>
+              <DrawerClose asChild></DrawerClose>
             </div>
           </DrawerContent>
         </Drawer>

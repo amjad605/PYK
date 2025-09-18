@@ -1,21 +1,40 @@
 import { Request, Response } from "express";
 import { PropertyModel } from "./property.model";
-
-export const createProperty = async (req: Request, res: Response) => {
-  try {
-    const property = new PropertyModel(req.body);
-    await property.save();
-    res.status(201).json(property);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
+import propertyService from "./property.service";
+import { AsyncWrapper } from "../utils/AsyncWrapper";
+import { ParsedPropertyFilters, PropertyFilterRequest } from "./property.type";
+class PropertyController {
+  private propertyService;
+  constructor() {
+    this.propertyService = propertyService;
   }
-};
 
-export const getProperties = async (_req: Request, res: Response) => {
-  try {
-    const properties = await PropertyModel.find();
-    res.json(properties);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-};
+  getProperties = AsyncWrapper(
+    async (req: PropertyFilterRequest, res, next) => {
+      const filters = req.query;
+
+      const parsedFilters: ParsedPropertyFilters = {
+        ...filters,
+        minPrice: filters.minPrice ? parseInt(filters.minPrice) : undefined,
+        maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
+        minArea: filters.minArea ? parseInt(filters.minArea) : undefined,
+        maxArea: filters.maxArea ? parseInt(filters.maxArea) : undefined,
+        bedrooms: filters.bedrooms ? parseInt(filters.bedrooms) : undefined,
+        bathrooms: filters.bathrooms ? parseInt(filters.bathrooms) : undefined,
+
+        // pagination
+        page: filters.page ? parseInt(filters.page) : 1,
+        limit: filters.limit ? parseInt(filters.limit) : 10,
+      };
+      const result = await propertyService.getFilteredProperties(parsedFilters);
+
+      res.json(result);
+    }
+  );
+  createProperty = AsyncWrapper(async (req, res, next) => {
+    const property = req.body;
+    const result = await propertyService.createProperty(property);
+    res.json(result);
+  });
+}
+export default new PropertyController();

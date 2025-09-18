@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { Request, Response } from "express";
-import { createProperty, getProperties } from "./property.controller";
+
+import propertyController from "./property.controller";
 const propertyRouter = Router();
-propertyRouter.get("/", getProperties);
-propertyRouter.post("/", createProperty);
+propertyRouter.get("/filter", propertyController.getProperties);
+propertyRouter.post("/", propertyController.createProperty);
+
 export default propertyRouter;

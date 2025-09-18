@@ -1,44 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, ChevronDown, Square } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
 
 interface AreaRangeFilterProps {
   value: [number, number];
-  onChange: (range: [number, number]) => void;
+  onChange: (range: [number | null, number | null]) => void;
   min?: number;
   max?: number;
   step?: number;
+  isFirstRender: boolean;
+  setIsFirstRender: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
   value,
   onChange,
   min = 50,
-  max = 1000,
+  max = 2000,
   step = 10,
+  isFirstRender,
+  setIsFirstRender,
 }) => {
   const [open, setOpen] = useState(false);
+  const [tempValue, setTempValue] = useState<[number, number]>([min, max]);
+
+  const formatArea = (area: number) => {
+    return `${area.toLocaleString()} m²`;
+  };
+
+  const applyFilter = () => {
+    onChange(tempValue);
+    setOpen(false);
+    setIsFirstRender(false);
+  };
 
   return (
-    <div className="relative w-full">
-      {/* Label */}
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <Square className="h-3.5 w-3.5 mr-1" />
-        AREA RANGE (m²)
-      </p>
-
+    <div className="relative">
       {/* Trigger Button */}
       <Button
         variant="outline"
-        onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-16 bg-gray-50   transition"
+        onClick={() => {
+          setTempValue(value); // كل مرة يفتح يرجّع القيم الحالية
+          setOpen(!open);
+        }}
+        className="flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-14.5 bg-gray-50 transition w-full"
       >
-        <span className="text-gray-700 text-sm">
-          {value[0] && value[1]
-            ? `${value[0]} m² - ${value[1]} m²`
+        {/* Text */}
+
+        <span
+          className={`${
+            !isFirstRender ? "text-gray-700" : "text-gray-400"
+          } font-medium text-sm`}
+        >
+          {!isFirstRender
+            ? `${formatArea(value[0])} - ${formatArea(value[1])}`
             : "Select Area Range"}
         </span>
         <ChevronDown
@@ -50,41 +68,54 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-4 space-y-3">
+        <div className="absolute mt-2 bg-white border border-gray-200 rounded-xl  z-10 p-4 space-y-3 w-72">
           <div className="flex items-center gap-2">
             <input
               type="number"
-              value={value[0]}
-              onChange={(e) => onChange([+e.target.value, value[1]])}
-              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              value={tempValue[0] ?? min}
+              onChange={(e) =>
+                setTempValue([+e.target.value, tempValue[1] ?? max])
+              }
+              className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Min"
             />
             <span className="text-gray-400">-</span>
             <input
               type="number"
-              value={value[1]}
-              onChange={(e) => onChange([value[0], +e.target.value])}
-              className="w-24 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              value={tempValue[1] ?? max}
+              onChange={(e) =>
+                setTempValue([tempValue[0] ?? min, +e.target.value])
+              }
+              className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Max"
             />
-            <SlidersHorizontal className="w-4 h-4 text-gray-500" />
           </div>
 
-          {/* Sliders */}
+          {/* Slider */}
           <Slider
             min={min}
             max={max}
             step={step}
-            value={value}
-            onValueChange={(newValue) => onChange([newValue[0], newValue[1]])}
+            value={tempValue}
+            onValueChange={(newValue) =>
+              setTempValue([newValue[0], newValue[1]])
+            }
             className="w-full py-3"
           />
 
           {/* Values */}
           <div className="flex justify-between text-xs text-gray-500">
-            <span>${min}</span>
-            <span>${max}</span>
+            <span>{formatArea(min)}</span>
+            <span>{formatArea(max)}</span>
           </div>
+
+          {/* Apply Button */}
+          <Button
+            onClick={applyFilter}
+            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+          >
+            Apply
+          </Button>
         </div>
       )}
     </div>

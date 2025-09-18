@@ -1,13 +1,8 @@
 "use client";
 
 import type { FC } from "react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
 import { ChevronDown, X, Bed, Bath } from "lucide-react";
 
 interface BedsBathsDropdownProps {
@@ -25,54 +20,58 @@ export const BedsBathsDropdown: FC<BedsBathsDropdownProps> = ({
 }) => {
   const numbers = [1, 2, 3, 4, 5];
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // يمنع الفتح أثناء الـ scroll على الموبايل
-    if (e.pointerType === "touch" && e.cancelable) {
-      e.preventDefault();
-    }
-  };
+  // close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col" style={{ touchAction: "pan-y" }}>
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <Bed className="h-3.5 w-3.5 mr-1 pointer-events-none" />
-        BEDS & BATHS
-      </p>
+    <div
+      className="relative flex flex-col"
+      ref={ref}
+      style={{ touchAction: "pan-y" }}
+    >
+      {/* Trigger */}
+      <Button
+        onClick={() => setOpen((prev) => !prev)}
+        variant="outline"
+        className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 py-4.5 h-auto"
+      >
+        <span
+          className={rooms || bathrooms ? "text-gray-900" : "text-gray-400"}
+        >
+          {rooms || bathrooms
+            ? `${rooms ?? "Any"} Beds • ${bathrooms ?? "Any"} Baths`
+            : "Any beds & baths"}
+        </span>
 
-      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            onPointerDown={handlePointerDown}
-            onClick={() => setOpen((prev) => !prev)}
-            variant="outline"
-            className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 py-5 h-auto"
-          >
-            <span
-              className={rooms || bathrooms ? "text-gray-900" : "text-gray-400"}
-            >
-              {rooms || bathrooms
-                ? `${rooms ?? "Any"} Beds • ${bathrooms ?? "Any"} Baths`
-                : "Any beds & baths"}
-            </span>
+        {rooms || bathrooms ? (
+          <X
+            className="h-4 w-4 opacity-60 hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              setRooms(null);
+              setBathrooms(null);
+            }}
+          />
+        ) : (
+          <ChevronDown className="h-4 w-4 opacity-60" />
+        )}
+      </Button>
 
-            {rooms || bathrooms ? (
-              <X
-                className="h-4 w-4 opacity-60 hover:opacity-100"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setRooms(null);
-                  setBathrooms(null);
-                }}
-              />
-            ) : (
-              <ChevronDown className="h-4 w-4 opacity-60 pointer-events-none" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="w-64 p-4 space-y-4 rounded-xl">
+      {/* Dropdown Content */}
+      {open && (
+        <div className="absolute z-50 top-full mt-2 w-64 p-4 space-y-4 rounded-xl bg-white border shadow-md">
           {/* Beds */}
           <div>
             <p className="text-xs font-medium text-gray-600 mb-2 flex items-center">
@@ -112,8 +111,8 @@ export const BedsBathsDropdown: FC<BedsBathsDropdownProps> = ({
               ))}
             </div>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 };

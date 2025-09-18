@@ -21,13 +21,9 @@ export const ContractDurationDropdown: FC<ContractDurationDropdownProps> = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <Clock className="h-3.5 w-3.5 mr-1" />
-        CONTRACT DURATION
-      </p>
       <Select value={value || ""} onValueChange={(val) => setValue(val)}>
         <SelectTrigger className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 h-auto py-7.5">
-          <SelectValue placeholder="Any" />
+          <SelectValue placeholder="Select Contract Duration" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="6-months">6 Months</SelectItem>

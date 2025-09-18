@@ -21,7 +21,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       {/* Image with Favorite Button */}
       <div className="relative overflow-hidden">
         <img
-          src={property.imageUrl || "/placeholder.svg"}
+          src={property.image || "/placeholder.svg"}
           alt={property.title}
           className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
         />

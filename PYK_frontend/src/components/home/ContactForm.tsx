@@ -124,7 +124,12 @@ export const ContactForm: React.FC = () => {
           <Button
             type="button"
             className="flex items-center h-12  justify-center gap-3 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
-            onClick={() => window.open("https://wa.me/201007379415", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://wa.me/201007379415?text=Hello%20I%20am%20interested%20in%20your%20services",
+                "_blank"
+              )
+            }
           >
             <MessageCircle className="h-5 w-5" />
             WhatsApp

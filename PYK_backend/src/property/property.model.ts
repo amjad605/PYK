@@ -1,136 +1,221 @@
-// src/models/property.model.ts
-import { Schema, model, models, Document } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
+import {
+  Areas,
+  DeveloperRef,
+  Finishing,
+  ListingType,
+  Media,
+  Owner,
+  Price,
+  PropertyLocation,
+  PropertyType,
+  RentDetails,
+  UnitLevel,
+} from "./property.type";
 
-export enum SaleType {
-  Primary = "PRIMARY",
-  Resale = "RESALE",
-}
-
-export enum Currency {
-  USD = "USD",
-  EUR = "EUR",
-  EGP = "EGP",
-  GBP = "GBP",
-}
-
-export interface Address {
-  street: string;
-  city: string;
-  state?: string;
-  country: string;
-  postalCode?: string;
-}
-
-/** ==== Base interface (shape only) ==== */
-export interface BaseProperty {
+export interface IPropertyDoc extends Document {
+  listingType: ListingType;
+  propertyType: PropertyType;
+  unitLevel?: UnitLevel;
   title: string;
   description?: string;
-  price: number;
-  currency: Currency;
-  sizeSqm: number;
+  status: "available" | "sold" | "rented" | "reserved";
+  areas: Areas;
+  price: Price;
   bedrooms?: number;
   bathrooms?: number;
-  status: "available" | "sold" | "rented";
-  listedAt: Date;
-  updatedAt?: Date;
-  address: Address;
-  images?: string[];
-  ownerId: string;
-  saleType: SaleType;
-  downPayment?: number; // سنضبطها بالقواعد في الـ schema
+  facilities: string[];
+  propertyLocation: PropertyLocation;
+  compoundId?: Types.ObjectId | null;
+  media: Media;
+  developer?: DeveloperRef;
+  deliveryDate?: Date;
+  owner?: Owner;
+  furnishing?: "furnished" | "semi-furnished" | "unfurnished";
+  finishing?: Finishing;
+  rentDetails?: RentDetails;
+  createdAt: Date;
+  updatedAt: Date;
+  hasGarden?: boolean;
+  hasTerrace?: boolean;
 }
 
-/** ==== Document interfaces (extend from Document) ==== */
-export interface PrimaryPropertyDoc extends BaseProperty, Document {
-  saleType: SaleType.Primary;
-  downPayment?: never; // مش مسموح
-}
+const buildingTypes: PropertyType[] = [
+  "apartment",
+  "duplex",
+  "penthouse",
+  "studio",
+];
+const villaTypes: PropertyType[] = ["villa", "townhouse", "twin_house"];
 
-export interface ResalePropertyDoc extends BaseProperty, Document {
-  saleType: SaleType.Resale;
-  downPayment: number; // إجباري
-}
-
-export type PropertyDoc = PrimaryPropertyDoc | ResalePropertyDoc;
-
-const AddressSchema = new Schema<Address>(
+const AreasSchema = new Schema<IPropertyDoc["areas"]>(
   {
-    street: { type: String, required: true, trim: true },
-    city: { type: String, required: true, trim: true },
-    state: { type: String, trim: true },
-    country: { type: String, required: true, trim: true },
-    postalCode: { type: String, trim: true },
+    builtUp: { type: Number, required: true, min: 1 },
+    land: { type: Number, min: 0 },
+    total: { type: Number, min: 0 },
+    garden: { type: Number, min: 0 },
+    terrace: { type: Number, min: 0 },
+    roof: { type: Number, min: 0 },
   },
   { _id: false }
 );
 
-const PropertySchema = new Schema<PropertyDoc>(
+const PropertySchema = new Schema<IPropertyDoc>(
   {
-    title: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
-    price: { type: Number, required: true, min: 0 },
-    currency: {
+    listingType: {
       type: String,
-      enum: Object.values(Currency),
+      enum: ["primary", "resale", "rent"],
       required: true,
     },
-    sizeSqm: { type: Number, required: true, min: 0 },
-    bedrooms: { type: Number, min: 0 },
-    bathrooms: { type: Number, min: 0 },
+    propertyType: {
+      type: String,
+      enum: [
+        "apartment",
+        "villa",
+        "townhouse",
+        "twin_house",
+        "duplex",
+        "penthouse",
+        "studio",
+      ],
+      required: true,
+    },
+    unitLevel: {
+      type: String,
+      enum: ["ground", "middle", "roof", "duplex-lower", "duplex-upper"],
+    },
+    title: { type: String, required: true },
+    description: String,
     status: {
       type: String,
-      enum: ["available", "sold", "rented"],
-      required: true,
+      enum: ["available", "sold", "rented", "reserved"],
       default: "available",
     },
-    listedAt: { type: Date, required: true, default: () => new Date() },
-    updatedAt: { type: Date },
-    address: { type: AddressSchema, required: true },
-    images: [{ type: String }],
-    ownerId: { type: String, required: true, index: true },
-
-    saleType: {
-      type: String,
-      enum: Object.values(SaleType),
-      required: true,
-      index: true,
+    areas: { type: AreasSchema, required: true },
+    price: {
+      currency: { type: String, required: true },
+      amount: Number,
+      monthlyRent: Number,
+      paymentPlan: {
+        downPayment: Number,
+        installments: {
+          years: Number,
+          frequency: { type: String, enum: ["monthly", "quarterly", "yearly"] },
+        },
+      },
     },
+    bedrooms: Number,
+    bathrooms: Number,
+    facilities: {
+      type: [String],
+      default: [],
+    },
+    location: {
+      city: { type: String, required: true },
+      district: String,
+      compound: String,
+      geo: {
+        type: { type: String, enum: ["Point"], default: "Point" },
+        coordinates: { type: [Number], index: "2dsphere" },
+      },
+    },
+    compoundId: { type: Schema.Types.ObjectId, ref: "Compound", default: null },
+    media: {
+      images: { type: [String], default: [] },
 
-    downPayment: {
-      type: Number,
-      min: 0,
-      validate: [
-        {
-          validator: function (this: PropertyDoc, v: number | undefined) {
-            return this.saleType === SaleType.Primary ? v == null : true;
-          },
-          message: "downPayment is not allowed for PRIMARY properties.",
-        },
-        {
-          validator: function (this: PropertyDoc, v: number | undefined) {
-            return this.saleType === SaleType.Resale ? v != null : true;
-          },
-          message: "downPayment is required for RESALE properties.",
-        },
+      floorPlans: { type: [String], default: [] },
+    },
+    developer: {
+      id: { type: Schema.Types.ObjectId, ref: "Developer" },
+      name: String,
+    },
+    deliveryDate: Date,
+    owner: {
+      name: String,
+      contact: { phone: String, email: String },
+    },
+    furnishing: {
+      type: String,
+      enum: ["furnished", "semi-furnished", "unfurnished"],
+    },
+    finishing: {
+      type: String,
+      enum: [
+        "finished",
+        "semi-finished",
+        "core-shell",
+        "red-brick",
+        "luxury-finished",
       ],
     },
+    rentDetails: {
+      leaseTerm: String,
+      deposit: Number,
+      furnished: Boolean,
+      utilitiesIncluded: Boolean,
+    },
   },
-  {
-    timestamps: true, // creates createdAt/updatedAt
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
+  { timestamps: true }
 );
 
-PropertySchema.pre("save", function (next) {
-  this.updatedAt = new Date();
-  next();
+/** Validations */
+PropertySchema.path("areas.land").validate({
+  validator(this: IPropertyDoc, value: number | undefined) {
+    if (villaTypes.includes(this.propertyType)) {
+      return typeof value === "number" && value > 0;
+    }
+    return true;
+  },
+  message: "Villas/townhouses must include 'areas.land'.",
 });
 
-PropertySchema.index({ "address.city": 1 });
-PropertySchema.index({ price: 1 });
-PropertySchema.index({ saleType: 1, price: 1 });
+PropertySchema.path("unitLevel").validate({
+  validator(this: IPropertyDoc, v: UnitLevel | undefined) {
+    if (buildingTypes.includes(this.propertyType)) return !!v;
+    return v === undefined || v === null;
+  },
+  message: "Building units require 'unitLevel'; villas must not have it.",
+});
 
-/** ==== Model ==== */
-export const PropertyModel =
-  models.Property || model<PropertyDoc>("Property", PropertySchema);
+PropertySchema.path("areas.garden").validate({
+  validator(this: IPropertyDoc, value: number | undefined) {
+    if (
+      buildingTypes.includes(this.propertyType) &&
+      this.unitLevel === "ground"
+    ) {
+      return typeof value === "number" && value > 0;
+    }
+    return true;
+  },
+  message: "Ground units must include 'areas.garden'.",
+});
+
+/** Virtuals */
+PropertySchema.virtual("hasGarden").get(function (this: IPropertyDoc) {
+  return typeof this.areas?.garden === "number" && this.areas.garden > 0;
+});
+PropertySchema.virtual("hasTerrace").get(function (this: IPropertyDoc) {
+  const t = this.areas?.terrace ?? 0;
+  const r = this.areas?.roof ?? 0;
+  return t > 0 || r > 0;
+});
+
+/** Indexes */
+PropertySchema.index({ listingType: 1, propertyType: 1, unitLevel: 1 });
+PropertySchema.index({ "areas.builtUp": 1 });
+PropertySchema.index({ "areas.land": 1 });
+PropertySchema.index({ bedrooms: 1, bathrooms: 1 });
+PropertySchema.index({ "price.amount": 1, "price.monthlyRent": 1 });
+PropertySchema.index({ compoundId: 1 });
+PropertySchema.index({
+  title: "text",
+  "location.city": "text",
+  "location.district": "text",
+  "location.compound": "text",
+  "developer.name": "text",
+});
+
+export const PropertyModel = mongoose.model<IPropertyDoc>(
+  "Property",
+  PropertySchema
+);

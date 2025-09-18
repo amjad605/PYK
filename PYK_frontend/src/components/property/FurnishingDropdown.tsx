@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Sofa } from "lucide-react";
+import { ChevronDown, Sofa, X } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -21,18 +21,20 @@ export const FurnishingDropdown: FC<FurnishingDropdownProps> = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <Sofa className="h-3.5 w-3.5 mr-1" />
-        FURNISHING
-      </p>
       <Select value={value || ""} onValueChange={(val) => setValue(val)}>
-        <SelectTrigger className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 h-auto py-7.5">
-          <SelectValue placeholder="Any" />
+        <SelectTrigger className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 h-auto py-7">
+          <SelectValue placeholder="Select Finishing" />
+          {value ? (
+            <X className="cursor-pointer  h-4 w-4 opacity-50" />
+          ) : (
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          )}
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="furnished">Furnished</SelectItem>
-          <SelectItem value="semi-furnished">Semi-Furnished</SelectItem>
-          <SelectItem value="unfurnished">Unfurnished</SelectItem>
+          <SelectItem value="Core & Shell">Core & Shell</SelectItem>
+          <SelectItem value="Semi-Finished">Semi-Finished"</SelectItem>
+          <SelectItem value="Finished">Finished</SelectItem>
+          <SelectItem value="Furnished">Furnished</SelectItem>
         </SelectContent>
       </Select>
     </div>

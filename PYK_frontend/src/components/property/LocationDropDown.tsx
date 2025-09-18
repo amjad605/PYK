@@ -29,19 +29,14 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <MapPin className="h-3.5 w-3.5 mr-1" />
-        LOCATION
-      </p>
-
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 py-5 h-auto"
+            className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 py-4 h-auto"
           >
             <span className={location ? "text-gray-900" : "text-gray-400"}>
-              {location || "Any location"}
+              {location || "Select location"}
             </span>
             {location ? (
               <X

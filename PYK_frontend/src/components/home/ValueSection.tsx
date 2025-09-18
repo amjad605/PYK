@@ -28,7 +28,7 @@ function ValueSection() {
           whileInView={{
             opacity: 1,
             transition: {
-              staggerChildren: 0.2, // delay between circles
+              // delay between circles
             },
           }}
           viewport={{ once: true }}
@@ -43,7 +43,7 @@ function ValueSection() {
             },
             {
               icon: Users,
-              title: "Personal Relationships",
+              title: "Personal Approach",
               description:
                 "Every client is family to us. We take time to understand your unique needs and preferences.",
             },
@@ -66,7 +66,10 @@ function ValueSection() {
                 key={index}
                 initial={{ opacity: 0, scale: 0.5, y: 30 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                transition={{
+                  duration: 0.4,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: true }}
                 className="text-center group"
               >

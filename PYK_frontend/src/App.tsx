@@ -11,19 +11,25 @@ import AdminPage from "./pages/AdminPage";
 import LOGO from "./assets/PYK INVEST Brand identity-23.svg";
 import Navbar from "./components/common/NavBar";
 import PropertyDetails from "./components/property/PropertyDetails";
+import ScrollToTop from "./utils/ScrollTop";
+import WhatsAppButton from "./components/common/WhatsAppButton";
 function App() {
   return (
     <div className="relative ">
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/sell" element={<SellPage />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/:cat" element={<SellPage />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
+
           <Route path="/properties" element={<PropertyPage />} />
-          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="/Admin" element={<AdminPage />} />
         </Routes>
       </BrowserRouter>
+      <WhatsAppButton />
       <Footer />
     </div>
   );

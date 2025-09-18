@@ -9,8 +9,8 @@ import {
 const tabs = [
   { id: "overview", label: "Overview", icon: Home },
   { id: "features", label: "Features", icon: CheckCircle },
-  { id: "history", label: "Property History", icon: TrendingUp },
-  { id: "master-plan", label: "Master Plan", icon: MapIcon },
+
+  { id: "master-plan", label: "Floor Plan", icon: MapIcon },
   { id: "financing", label: "Financing", icon: Calculator },
 ];
 

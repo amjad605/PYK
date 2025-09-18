@@ -1,15 +1,9 @@
 "use client";
 
 import type { FC } from "react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 interface FacilitiesDropdownProps {
   facilities: string[];
@@ -23,60 +17,95 @@ export const FacilitiesDropdown: FC<FacilitiesDropdownProps> = ({
   setFacilities,
 }) => {
   const [open, setOpen] = useState(false);
+  const [tempFacilities, setTempFacilities] = useState<string[]>(facilities);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // sync temporary selection with actual selection on open
+  useEffect(() => {
+    if (open) {
+      setTempFacilities(facilities);
+    }
+  }, [open, facilities]);
+
+  // close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggleFacility = (facility: string) => {
-    if (facilities.includes(facility)) {
-      setFacilities(facilities.filter((f) => f !== facility));
+    if (tempFacilities.includes(facility)) {
+      setTempFacilities(tempFacilities.filter((f) => f !== facility));
     } else {
-      setFacilities([...facilities, facility]);
+      setTempFacilities([...tempFacilities, facility]);
     }
   };
 
+  const applyChanges = () => {
+    setFacilities(tempFacilities);
+    setOpen(false);
+  };
+
   return (
-    <div className="flex flex-col">
-      <p className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-        <Settings className="h-3.5 w-3.5 mr-1" />
-        FACILITIES
-      </p>
+    <div
+      className="relative flex flex-col"
+      ref={ref}
+      style={{ touchAction: "pan-y" }}
+    >
+      {/* Trigger */}
+      <Button
+        onClick={() => setOpen((prev) => !prev)}
+        variant="outline"
+        className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 py-4.5 h-auto"
+      >
+        <span className={facilities.length ? "text-gray-900" : "text-gray-400"}>
+          {facilities.length > 0 ? facilities.join(", ") : "Select facilities"}
+        </span>
 
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            onPointerDown={(e) => {
-              // يمنع الفتح أثناء الـ scroll على الموبايل
-              if (e.pointerType === "touch" && e.cancelable) {
-                e.preventDefault();
-              }
+        {facilities.length > 0 ? (
+          <X
+            className="h-4 w-4 opacity-60 hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFacilities([]);
             }}
-            onClick={() => setOpen((prev) => !prev)}
-            variant="outline"
-            className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 py-5 h-auto"
-          >
-            <span
-              className={facilities.length ? "text-gray-900" : "text-gray-400"}
-            >
-              {facilities.length > 0
-                ? facilities.join(", ")
-                : "Select facilities"}
-            </span>
+          />
+        ) : (
+          <ChevronDown className="h-4 w-4 opacity-60" />
+        )}
+      </Button>
 
-            <ChevronDown className="h-4 w-4 opacity-60" />
-          </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="w-56 p-3 space-y-1 rounded-xl">
+      {/* Dropdown Content */}
+      {open && (
+        <div className="absolute z-50 top-full mt-2 w-56 p-3 space-y-1 rounded-xl bg-white border shadow-md">
           {allFacilities.map((facility) => (
-            <DropdownMenuCheckboxItem
+            <label
               key={facility}
-              checked={facilities.includes(facility)}
-              onCheckedChange={() => toggleFacility(facility)}
-              className="rounded-md py-2 w-full"
+              className="flex items-center gap-2 rounded-md py-2 cursor-pointer"
             >
-              {facility}
-            </DropdownMenuCheckboxItem>
+              <input
+                type="checkbox"
+                checked={tempFacilities.includes(facility)}
+                onChange={() => toggleFacility(facility)}
+                className="border-none text-primary focus:ring-0 rounded-full h-4 w-4"
+              />
+              <span>{facility}</span>
+            </label>
           ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+          {/* Apply button */}
+          <div className="pt-2 border-t mt-2 flex justify-end">
+            <Button size="sm" onClick={applyChanges}>
+              Apply
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,8 +1,9 @@
 // Nav.tsx
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/black.svg"; // your logo
+import { Link, useLocation } from "react-router-dom";
 
-const NAV_ITEMS = ["Home", "Primary", "ReSale", "Rent", "About", "Contact Us"];
+const NAV_ITEMS = ["Home", "Primary", "Resale", "Rent", "About", "Contact Us"];
 
 export default function Nav({
   heroSelector = "#hero",
@@ -11,11 +12,12 @@ export default function Nav({
 }) {
   const [open, setOpen] = useState(false);
   const [isSolid, setIsSolid] = useState(false);
-
+  const location = useLocation();
+  const currentPath = location.pathname;
   // Observe hero visibility. If hero is NOT intersecting -> make nav solid.
   useEffect(() => {
     const hero = document.querySelector(heroSelector);
-
+    console.log("curr path is :" + currentPath);
     if (!hero) {
       // fallback: simple scroll threshold
       const onScroll = () => setIsSolid(window.scrollY > 800);
@@ -52,7 +54,7 @@ export default function Nav({
         <div className="max-w-[92%] mx-auto px-0 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <a href="#" className="flex items-center">
+            <Link to="/" className="flex items-center">
               {/* If your black logo is invisible on hero, replace with white logo or use CSS invert. 
                   invert may not work on all svgs—better to provide a white svg for hero. */}
               <img
@@ -60,22 +62,33 @@ export default function Nav({
                 alt="Logo"
                 className={`h-30 w-30  ml-4 sm:ml-0 transition-all duration-200 }`}
               />
-            </a>
+            </Link>
 
             {/* Desktop links */}
             <div className="hidden md:flex items-center space-x-6">
               {NAV_ITEMS.map((item) => (
-                <a
+                <Link
                   key={item}
-                  href="#"
-                  className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 rounded-md ${
+                  to={
+                    item === "Contact Us"
+                      ? "/#contact"
+                      : `/${item.toLocaleLowerCase()}`
+                  }
+                  className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 r ${
                     isSolid
                       ? "text-gray-800 hover:text-blue-600"
                       : "text-white hover:text-blue-200"
-                  }`}
+                  } 
+                  ${
+                    currentPath === `/${item.toLocaleLowerCase()}`
+                      ? "text-blue font-medium border-b-2 border-blue pb-1"
+                      : "text-muted-foreground"
+                  }
+                  
+                  `}
                 >
                   {item}
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -145,15 +158,19 @@ export default function Nav({
           >
             {NAV_ITEMS.map((item) => (
               <li key={item}>
-                <a
-                  href="#"
+                <Link
+                  to={
+                    item === "Contact Us"
+                      ? "/#contact"
+                      : `/${item.toLocaleLowerCase()}`
+                  }
                   onClick={() => setOpen(false)}
                   className={`block px-4 py-2 rounded-md text-sm transition ${
                     isSolid ? "hover:bg-gray-100" : "hover:bg-white/10"
                   }`}
                 >
                   {item}
-                </a>
+                </Link>
               </li>
             ))}
 

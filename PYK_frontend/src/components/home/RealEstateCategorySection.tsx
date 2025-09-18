@@ -5,6 +5,7 @@ import img2 from "../../assets/Modern Architectural Entrance.png";
 import img3 from "../../assets/Modern Chic Apartment Interior.png";
 import img4 from "../../assets/Modern House at Twilight.png";
 import { motion } from "framer-motion";
+
 const categories = [
   {
     category: "primary" as const,
@@ -91,13 +92,14 @@ const RealEstateCategorySection: React.FC = () => {
   }, []);
 
   const handleViewListings = (cat: string) => {
+    // navigate(`/${cat}`);
     console.log("Viewing listings for", cat);
     // navigation logic...
   };
 
   return (
     <section className="py-12 px-4 bg-[var(--color-surface,#f9fafb)]">
-      <div className="max-w-6xl mx-auto">
+      <div className=" max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -168,16 +170,20 @@ const RealEstateCategorySection: React.FC = () => {
             transition: { staggerChildren: 2 }, // cards appear one by one
           }}
           viewport={{ once: true }}
-          className="hidden md:flex md:flex-wrap md:justify-center md:gap-8 mt-6"
+          className="hidden md:flex md:flex-wrap md:justify-around md:gap-0 mt-6"
         >
-          {categories.map((c) => (
+          {categories.map((c, index) => (
             <motion.div
               initial={{ opacity: 0, y: 90 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{
+                delay: index * 0.4,
+                duration: 1,
+                ease: "easeOut",
+              }}
               viewport={{ once: true }}
               key={c.category}
-              className="w-[320px]"
+              className="w-[380px] "
             >
               <RealEstateCategoryCard
                 category={c.category}

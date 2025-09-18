@@ -1,38 +1,117 @@
-interface Address {
-  street: string;
-  city: string;
-  state?: string;
-  country: string;
-  postalCode?: string;
-}
+import { Request } from "express";
+import { Types } from "mongoose";
+export type PropertyFilters = {
+  minPrice?: string;
+  maxPrice?: string;
+  minArea?: string;
+  maxArea?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  furnishing?: "furnished" | "semi-furnished" | "unfurnished";
+  listingType?: "resale" | "primary" | "rent";
+  propertyType?: "apartment" | "villa" | "studio" | "duplex";
+  location?: string;
+  compound?: string;
+  facilities?: string[];
 
-interface BaseProperty {
-  id: string;
-  title: string;
-  description?: string;
-  price: number;
-  sizeSqm: number;
+  // pagination
+  page?: string;
+  limit?: string;
+};
+
+export type PropertyFilterRequest = Request<
+  {}, // params
+  {}, // response
+  {}, // body
+  PropertyFilters // query
+>;
+export type ParsedPropertyFilters = {
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
   bedrooms?: number;
   bathrooms?: number;
-  status: "available" | "sold" | "rented";
-  listedAt: Date;
-  updatedAt?: Date;
-  address: Address;
-  images?: string[];
-  ownerId: string;
+  furnishing?: "furnished" | "semi-furnished" | "unfurnished";
+  listingType?: "resale" | "primary" | "rent";
+  propertyType?: "apartment" | "villa" | "studio" | "duplex";
+  location?: string;
+  compound?: string;
+  facilities?: string[];
+  search?: string;
+  // pagination
+
+  page: number;
+  limit: number;
+};
+
+export type ListingType = "primary" | "resale" | "rent";
+export type Finishing =
+  | "finished"
+  | "semi-finished"
+  | "core-shell"
+  | "red-brick"
+  | "luxury-finished";
+export type PropertyType =
+  | "apartment"
+  | "villa"
+  | "townhouse"
+  | "twin_house"
+  | "duplex"
+  | "penthouse"
+  | "studio";
+
+export type UnitLevel =
+  | "ground"
+  | "middle"
+  | "roof"
+  | "duplex-lower"
+  | "duplex-upper";
+
+export interface Price {
+  currency: string;
+  amount?: number; // for sale (primary/resale)
+  monthlyRent?: number; // for rent
+  paymentPlan?: {
+    // for primary
+    downPayment: number;
+    installments: {
+      years: number;
+      frequency: "monthly" | "quarterly" | "yearly";
+    };
+  };
 }
 
-enum SaleType {
-  Primary = "PRIMARY",
-  Resale = "RESALE",
+export interface RentDetails {
+  leaseTerm: string;
+  deposit: number; // in months
+  furnished: boolean;
+  utilitiesIncluded: boolean;
 }
+export interface Areas {
+  builtUp: number;
+  land?: number;
+  total?: number;
+  garden?: number;
+  terrace?: number;
+  roof?: number;
+}
+export interface PropertyLocation {
+  city: string;
+  district?: string;
+  compound?: string;
+  geo?: { type: "Point"; coordinates: [number, number] };
+}
+export interface DeveloperRef {
+  id: Types.ObjectId;
+  name: string;
+}
+export interface Owner {
+  name: string;
+  contact: { phone: string; email: string };
+}
+export interface Media {
+  images: string[];
 
-interface PrimaryProperty extends BaseProperty {
-  saleType: SaleType.Primary;
+  floorPlans: string[];
 }
-
-interface ResaleProperty extends BaseProperty {
-  saleType: SaleType.Resale;
-  downPayment: number; // mandatory for resale
-}
-type Property = PrimaryProperty | ResaleProperty;

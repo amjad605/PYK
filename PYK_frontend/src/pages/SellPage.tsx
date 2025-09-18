@@ -1,184 +1,124 @@
-import Nav from "../components/common/Nav";
-
-import modernvilla from "../assets/modern-villa-with-pool.png";
-
-import PropertyCard from "../components/property/PropertyCard";
-
-import bg2 from "../assets/IMG_4024.jpg";
-import { useState } from "react";
-
+import Nav from "@/components/common/Nav";
 import FiltersCard from "@/components/property/FiltersCard";
-interface Property {
-  id: number;
-  title: string;
-  price: string;
-  location: string;
-  bedrooms: number;
-  bathrooms: number;
-  area: string;
-  imageUrl: string;
-  category: "rent" | "resale" | "primary";
-}
-
-interface FilterState {
-  location: string;
-  propertyType: string;
-  priceRange: string;
-  bedrooms: string;
-  bathrooms: string;
-  category: string;
-}
+import PropertyCardListView from "@/components/property/PropertyCardListView";
+import { useProperty } from "@/hooks/useProperty";
+import { useState, useEffect } from "react";
+import { replace, useParams, useSearchParams } from "react-router-dom";
+import bg2 from "../assets/Modern House at Twilight.png";
+import { Pagination } from "@/utils/Pagination";
 
 export default function SellPage() {
-  const properties: Property[] = [
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
-    },
-  ];
-  const [filters, setFilters] = useState<Record<string, unknown>>({});
-  const [filteredProperties, setFilteredProperties] = useState<
-    Property[] | null
-  >(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const handleFilterChange = async (filters: FilterState) => {
-    setIsLoading(true);
-    console.log("[v0] Filter changed:", filters);
+  // ⬇️ Initialize filters from URL or default
+  const [filters, setFilters] = useState({
+    propertyType: searchParams.get("propertyType") || "",
+    location: searchParams.get("location") || null,
+    priceRange: [
+      Number(searchParams.get("minPrice")) || 500000,
+      Number(searchParams.get("maxPrice")) || 25000000,
+    ],
+    areaRange: [
+      Number(searchParams.get("minArea")) || 100,
+      Number(searchParams.get("maxArea")) || 5000,
+    ],
+    rooms: searchParams.get("rooms") || null,
+    bathrooms: searchParams.get("bathrooms") || null,
+    facilities: searchParams.getAll("facilities") || [],
+    furnishing: searchParams.get("furnishing") || null,
+    contractDuration: searchParams.get("contractDuration") || null,
+    keyword: searchParams.get("keyword") || "",
+    page: Number(searchParams.get("page")) || 1,
+    limit: Number(searchParams.get("limit")) || 9,
+  });
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  // ⬇️ Sync filters to URL whenever they change
+  useEffect(() => {
+    const params = new URLSearchParams();
 
-    // TODO: Replace with actual backend API call
-    // const response = await fetch('/api/properties', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // })
-    // const data = await response.json()
-    // setFilteredProperties(data.properties)
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value === null || value === undefined) return;
 
-    // For now, filter locally (remove this when backend is ready)
-    let filtered = properties;
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, String(v)));
+      } else {
+        params.set(key, String(value));
+      }
+    });
 
-    if (filters.category) {
-      filtered = filtered.filter((p) => p.category === filters.category);
+    // قارن قبل التحديث
+    const currentParams = new URLSearchParams(window.location.search);
+
+    if (params.toString() !== currentParams.toString()) {
+      setSearchParams(params, { replace: true });
     }
-    if (filters.location) {
-      filtered = filtered.filter((p) =>
-        p.location.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-    if (filters.bedrooms) {
-      filtered = filtered.filter(
-        (p) => p.bedrooms >= Number.parseInt(filters.bedrooms)
-      );
-    }
-    if (filters.bathrooms) {
-      filtered = filtered.filter(
-        (p) => p.bathrooms >= Number.parseInt(filters.bathrooms)
-      );
-    }
-
-    setFilteredProperties(filtered);
-    setIsLoading(false);
+  }, [filters, setSearchParams]);
+  const handleFilterChange = (newFilters: Record<string, unknown>) => {
+    // reset page to 1 when filters change
+    setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
   };
+
+  // ⬇️ Call backend with current filters + pagination
+  const {
+    data: properties,
+    totalCount,
+    loading,
+    error,
+  } = useProperty({
+    listingType: params.cat,
+    propertyType: filters.propertyType?.toLocaleLowerCase() ?? "",
+    minPrice: filters.priceRange[0],
+    maxPrice: filters.priceRange[1],
+    bedrooms: filters.rooms,
+    location: (filters.location ?? "").split(",")[0],
+    bathrooms: filters.bathrooms,
+    facilities: filters.facilities ?? [],
+    search: filters.keyword,
+    page: filters.page,
+    limit: filters.limit,
+  });
+
+  // ⬇️ Calculate total pages from backend
+  const totalPages = Math.ceil((totalCount || 0) / filters.limit);
+
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Hero Section */}
       <div
-        className="relative  bg-cover bg-center"
-        style={{
-          backgroundImage: `url("${bg2}")`,
-        }}
+        className="relative bg-cover bg-center"
+        style={{ backgroundImage: `url("${bg2}")` }}
       >
         <Nav />
-
-        {/* Search Bar */}
-        <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 lg:px-8 top-30 ">
-          <FiltersCard listingType="rent" />
+        <div className="max-w-7xl mx-auto relative z-10   top-30">
+          <FiltersCard
+            listingType={params.cat}
+            filters={filters}
+            setFilters={setFilters}
+            onApply={handleFilterChange}
+          />
         </div>
       </div>
 
-      <section className="mt-40 flex flex-col items-center justify-center mx-auto max-w-7xl">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Available Properties
-            </h2>
-            <p className="text-gray-600 text-sm mt-1">
-              Showing 1-10 of 50 properties
-            </p>
-          </div>
+      {/* Property List */}
+      <PropertyCardListView
+        properties={properties}
+        totalCount={totalCount}
+        loading={loading}
+      />
+
+      {/* Pagination */}
+      {properties.length > 0 && (
+        <div className="flex justify-center pb-10 bg-stone-50">
+          <Pagination
+            page={filters.page}
+            totalPages={totalPages} // محسوبة من backend
+            onPageChange={(newPage) =>
+              setFilters((prev) => ({ ...prev, page: newPage }))
+            }
+          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-      </section>
+      )}
     </div>
   );
 }

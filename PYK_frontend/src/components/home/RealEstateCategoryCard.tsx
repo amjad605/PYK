@@ -1,6 +1,7 @@
 "use client";
 
 import type { FC } from "react";
+import { Link } from "react-router-dom";
 
 interface RealEstateCategoryCardProps {
   category: "rent" | "resale" | "primary";
@@ -21,7 +22,7 @@ export const RealEstateCategoryCard: FC<RealEstateCategoryCardProps> = ({
 }) => {
   return (
     <div
-      className={`relative w-80 h-[400px] overflow-hidden group cursor-pointer transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 ${className}`}
+      className={`relative w-full h-[400px] overflow-hidden group cursor-pointer transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 ${className}`}
     >
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
@@ -63,31 +64,33 @@ export const RealEstateCategoryCard: FC<RealEstateCategoryCardProps> = ({
           </p>
 
           {/* CTA Button with modern design */}
-          <button
-            onClick={onViewListings}
-            type="button"
-            className="group/btn relative w-full bg-black/90 backdrop-blur-sm hover:bg-black text-white font-medium transition-all duration-300 py-3 px-4 rounded-xl border border-white/20 hover:border-purple-400/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 overflow-hidden"
-          >
-            {/* Button background effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-blue-300/10 to-purple-500/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
-            <span className="relative flex items-center justify-center gap-2">
-              View Listings
-              <svg
-                className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </span>
-          </button>
+          <Link to={`/${category}`}>
+            <button
+              onClick={onViewListings}
+              type="button"
+              className="group/btn relative w-full bg-black/90 backdrop-blur-sm hover:bg-black text-white font-medium transition-all duration-300 py-3 px-4 rounded-xl border border-white/20 hover:border-blue-400/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 overflow-hidden"
+            >
+              {/* Button background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-blue-300/10 to-purple-500/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
+              <span className="relative flex items-center justify-center gap-2">
+                View Listings
+                <svg
+                  className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </button>
+          </Link>
         </div>
       </div>
 

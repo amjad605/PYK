@@ -24,7 +24,7 @@ export const PropertyFilterCard: React.FC<PropertyFilterCardProps> = ({
   const [filters, setFilters] = useState<FilterState>({
     location: "",
     propertyType: "",
-    priceRange: [0, 100000000],
+    priceRange: [5000000, 100000000],
     rooms: "",
     category: "",
   });
