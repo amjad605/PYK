@@ -26,7 +26,7 @@ import {
   Users,
   Clock,
 } from "lucide-react";
-import type { PropertyData } from "./PropertyCard.type";
+import type { PropertyData } from "../property/PropertyCard.type";
 
 interface PropertyDetailsPageProps {
   property: PropertyData;

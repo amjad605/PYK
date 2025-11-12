@@ -1,11 +1,48 @@
 import { IPropertyDoc } from "./property.model";
-import { ParsedPropertyFilters, PropertyFilters } from "./property.type";
+import { ParsedPropertyFilters } from "./property.type";
 import { PropertyModel } from "./property.model";
 import { AppError } from "../utils/AppError";
+
+// 🔹 Helper function to normalize search terms
+function normalizeSearchTerm(term: string): string[] {
+  const lower = term.toLowerCase().trim();
+
+  const synonyms: Record<string, string[]> = {
+    fifth: [
+      "5th",
+      "fifth",
+      "خامس",
+      "el khames",
+      "fifth settlement",
+      "tagmo3 el khames",
+      "التجمع الخامس",
+    ],
+    "new cairo": ["new cairo", "el tagmo3", "القاهرة الجديدة"],
+    "6 october": [
+      "6 october",
+      "october",
+      "٦ اكتوبر",
+      "مدينة 6 اكتوبر",
+      "6 october city",
+      "اكتوبر",
+    ],
+  };
+
+  let expanded = [lower];
+  for (const [key, values] of Object.entries(synonyms)) {
+    if (values.includes(lower)) {
+      expanded = [...expanded, ...values];
+    }
+  }
+
+  return [...new Set(expanded)];
+}
+
 class PropertyService {
   async getFilteredProperties(filters: ParsedPropertyFilters) {
     const query: any = {};
 
+    // 📌 Price filter
     if (filters.minPrice || filters.maxPrice) {
       if (filters.listingType === "rent") {
         query["price.monthlyRent"] = {};
@@ -20,6 +57,7 @@ class PropertyService {
       }
     }
 
+    // 📌 Area filter
     if (filters.minArea || filters.maxArea) {
       const field = "areas.builtUp";
       query[field] = {};
@@ -38,10 +76,9 @@ class PropertyService {
       const facilitiesArray = Array.isArray(filters.facilities)
         ? filters.facilities
         : [filters.facilities];
-
-      // بدل $all خليك في $in
       query.facilities = { $in: facilitiesArray };
     }
+
     let properties = [];
     let total = 0;
 
@@ -49,31 +86,34 @@ class PropertyService {
     const limit = filters.limit || 20;
     const skip = (page - 1) * limit;
 
+    // 📌 Advanced Search
     if (filters.search) {
-      // 1. Try text search
-      const textQuery = { ...query, $text: { $search: filters.search.trim() } };
+      const terms = normalizeSearchTerm(filters.search);
+
+      // Text search first
+      const textQuery = { ...query, $text: { $search: terms.join(" ") } };
 
       [properties, total] = await Promise.all([
-        PropertyModel.find(textQuery)
+        PropertyModel.find(textQuery, { score: { $meta: "textScore" } })
           .skip(skip)
           .limit(limit)
           .sort({ score: { $meta: "textScore" } }),
         PropertyModel.countDocuments(textQuery),
       ]);
 
-      // 2. If no results → fallback to regex (partial match)
+      // Fallback → regex search
       if (total === 0) {
         const regexQuery = {
           ...query,
-          $or: [
-            {
-              title: { $regex: filters.search, $options: "i" },
-            },
-            { "location.city": { $regex: filters.search, $options: "i" } },
-            { "location.district": { $regex: filters.search, $options: "i" } },
-            { "location.compound": { $regex: filters.search, $options: "i" } },
-            { "developer.name": { $regex: filters.search, $options: "i" } },
-          ],
+          $or: terms.map((t) => ({
+            $or: [
+              { title: { $regex: t, $options: "i" } },
+              { "location.city": { $regex: t, $options: "i" } },
+              { "location.district": { $regex: t, $options: "i" } },
+              { "location.compound": { $regex: t, $options: "i" } },
+              { "developer.name": { $regex: t, $options: "i" } },
+            ],
+          })),
         };
 
         [properties, total] = await Promise.all([
@@ -82,7 +122,6 @@ class PropertyService {
         ]);
       }
     } else {
-      // No search, only filters
       [properties, total] = await Promise.all([
         PropertyModel.find(query).skip(skip).limit(limit),
         PropertyModel.countDocuments(query),
@@ -99,30 +138,25 @@ class PropertyService {
       },
     };
   }
+
   async createProperty(property: Partial<IPropertyDoc>): Promise<IPropertyDoc> {
     try {
-      // Validate required fields early (avoid DB call if obvious missing fields)
       if (!property.title || !property.listingType || !property.propertyType) {
         throw new AppError("Missing required property fields", 400);
       }
 
-      // Use `exists()` instead of `findOne()` for better performance (no full doc returned)
       const exists = await PropertyModel.exists({ title: property.title });
       if (exists) {
         throw new AppError("Property already exists", 400);
       }
 
-      // `create()` already saves, no need to call `save()` again
       const createdProperty = await PropertyModel.create(property);
-
       return createdProperty;
     } catch (error: any) {
-      // Wrap mongoose validation errors nicely
       if (error.name === "ValidationError") {
         throw new AppError(error.message, 400);
       }
-
-      throw error; // rethrow unhandled errors (let global handler catch them)
+      throw error;
     }
   }
 }

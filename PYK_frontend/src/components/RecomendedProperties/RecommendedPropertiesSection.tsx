@@ -1,78 +1,82 @@
 import React from "react";
 
 import cozyVilla from "../../assets/cozy-family-duplex.png";
-import modernvilla from "../../assets/modern-villa-with-pool.png";
+import modernvilla from "../../assets/luxury-downtown-apartment.png";
 import luxuryApartment from "../../assets/luxury-downtown-apartment.png";
-import PropertyCard from "../property/PropertyCard";
-import { type Property } from "../property/PropertyCard.type";
+import PropertyCard from "../notUsed/PropertyCard";
+import { type PropertyData } from "../property/PropertyCard.type";
+
 function RecommendedPropertiesSection() {
-  const recommendedProperties: Property[] = [
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+  // Supporting interfaces
+
+  // Enums
+
+  // Mock data
+  const mockProperty: PropertyData = {
+    id: "prop-12345",
+    listingType: "resale",
+    propertyType: "apartment",
+    unitLevel: "ground",
+    title: "Luxury 3-Bedroom Apartment with Sea View",
+    description:
+      "Stunning luxury apartment with panoramic sea views, located in the heart of the city. Features high-end finishes and premium amenities.",
+    status: "available",
+
+    areas: {
+      builtUp: 180,
+      land: 220,
     },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+    price: {
+      amount: 7500000,
+      currency: "USD",
     },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+    bedrooms: 3,
+    bathrooms: 3,
+    facilities: [
+      "Swimming Pool",
+      "Gym",
+      "Spa",
+      "Children's Play Area",
+      "24/7 Security",
+    ],
+    features: [
+      "Sea View",
+      "Balcony",
+      "Walk-in Closet",
+      "Central AC",
+      "Smart Home System",
+    ],
+    location: {
+      district: "123 Coastal Avenue",
+      city: "Dubai",
     },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+    compoundId: "comp-67890",
+    media: {
+      images: [
+        "https://images.unsplash.com/photo-1605146769289-440113cc3d00?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "https://images.unsplash.com/photo-1605146769289-440113cc3d00?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      ],
+      videos: ["https://example.com/virtual-tour.mp4"],
     },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+    developer: {
+      id: "dev-54321",
+      name: "Emaar Properties",
     },
-    {
-      id: 1,
-      title: "Modern Villa with Pool",
-      location: "Beverly Hills, CA",
-      price: "$2,850,000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "3,200",
-      imageUrl: modernvilla,
-      category: "resale",
+    deliveryDate: "2024-12-01",
+    owner: {
+      name: "Ahmed Hassan",
     },
+    finishing: "finished",
+  };
+
+  // Additional mock data for different property types
+  const mockProperties: PropertyData[] = [
+    mockProperty,
+    mockProperty,
+    mockProperty,
+    mockProperty,
+    mockProperty,
+    mockProperty,
   ];
   return (
     <section className="py-10">
@@ -93,7 +97,7 @@ function RecommendedPropertiesSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {recommendedProperties.map((property) => (
+          {mockProperties.map((property) => (
             <PropertyCard property={property} key={property.id} />
           ))}
         </div>

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import PropertyCard from "@/components/property/PropertyCard";
+import PropertyCard from "@/components/notUsed/PropertyCard";
 import type { Property } from "@/components/property/PropertyCard.type";
 import image from "../assets/cozy-family-duplex.png";
 import Nav from "@/components/common/Nav";

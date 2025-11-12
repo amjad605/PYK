@@ -19,7 +19,7 @@ const redIcon = new L.Icon({
 
 const CompanyMap: React.FC = () => {
   return (
-    <div className="w-full h-80 rounded-2xl shadow-md overflow-hidden">
+    <div className="w-full h-full rounded-2xl shadow-md overflow-hidden">
       <MapContainer
         scrollWheelZoom={false}
         attributionControl={false}

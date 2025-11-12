@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { PropertyData } from "./PropertyCard.type";
 import { Link, useNavigate } from "react-router-dom";
+import formatPrice from "../../utils/formatPrice";
 
 interface PropertyCardProps {
   property: PropertyData;
@@ -35,18 +36,8 @@ const facilityIcons = {
 };
 
 export function PropertyCardNew({ property }: PropertyCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
-  const formatPrice = (price: number) => {
-    if (property.listingType === "rent") {
-      return `EGP ${price.toLocaleString()}/month`;
-    }
-    if (price >= 1000000) {
-      return `EGP ${(price / 1000000).toFixed(1)}M`;
-    }
-    return `EGP ${price.toLocaleString()}`;
-  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -107,7 +98,7 @@ export function PropertyCardNew({ property }: PropertyCardProps) {
 
         <div className="mb-4">
           <p className="text-2xl font-bold text-blue-600">
-            {formatPrice(property.price.amount ?? 0)}
+            {formatPrice(property.price.amount ?? 0, property.listingType)}
           </p>
         </div>
 

@@ -15,7 +15,7 @@ function ContactUs() {
   return (
     <section
       id="contact"
-      className="h-screen  bg-blue text-white flex items-center"
+      className="min-h-screen bg-blue text-white flex items-center py-12"
     >
       <div className="max-w-7xl mx-auto px-6 w-full">
         {/* Header */}
@@ -27,40 +27,38 @@ function ContactUs() {
           </p>
         </div>
 
-        {/* Main Layout: Form + Info */}
-        <div className="grid lg:grid-cols-2 gap-16 h-full items-start">
-          {/* Contact Form */}
-          <div className="flex flex-col justify-between bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-            <div>
-              <h3 className="text-blue-100 mb-6 text-xl font-semibold text-center">
-                Contact Agent
-              </h3>
-              <form className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-                <textarea
-                  placeholder="Message"
-                  className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
-                  rows={4}
-                ></textarea>
-                <Button className="w-full mt-2 bg-white text-blue-700 hover:bg-blue-50">
-                  Send Message
-                </Button>
-              </form>
-            </div>
+        {/* Main Layout */}
+        <div className="grid lg:grid-cols-2 gap-10">
+          {/* Contact Form + Social */}
+          <div className="flex flex-col bg-white/10 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+            <h3 className="text-blue-100 mb-6 text-xl font-semibold text-center">
+              Contact Agent
+            </h3>
+            <form className="space-y-4 flex-1">
+              <input
+                type="text"
+                placeholder="Your Name"
+                className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
+              <input
+                type="email"
+                placeholder="Your Email"
+                className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
+              <textarea
+                placeholder="Message"
+                className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+                rows={4}
+              ></textarea>
+              <Button className="w-full mt-2 bg-white text-blue hover:bg-black">
+                Send Message
+              </Button>
+            </form>
 
             {/* Follow Us */}
-            <div className="mt-8 bg-white/10 rounded-2xl shadow-lg border border-white/20 p-6">
+            <div className="mt-8 bg-white/10 rounded-2xl shadow-lg border border-white/20 p-4">
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
-              <div className="flex space-x-4">
+              <div className="flex space-x-3">
                 {[
                   { icon: Facebook, color: "hover:text-blue-200", link: "#" },
                   { icon: Twitter, color: "hover:text-blue-300", link: "#" },
@@ -76,7 +74,7 @@ function ContactUs() {
                     <a
                       key={index}
                       href={social.link}
-                      className={`p-3 bg-white/20 rounded-full text-white ${social.color} transition`}
+                      className={`p-2 bg-white/20 rounded-full text-white ${social.color} transition`}
                     >
                       <Icon className="h-5 w-5" />
                     </a>
@@ -86,10 +84,10 @@ function ContactUs() {
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="space-y-4 overflow-y-auto max-h-full">
+          {/* Contact Information + Map */}
+          <div className="space-y-6">
             {/* Info Cards */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {[
                 {
                   icon: Phone,
@@ -128,7 +126,7 @@ function ContactUs() {
             </div>
 
             {/* Map */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 h-80">
               <CompanyMap />
             </div>
           </div>

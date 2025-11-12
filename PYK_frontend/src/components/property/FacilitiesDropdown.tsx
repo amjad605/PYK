@@ -61,7 +61,7 @@ export const FacilitiesDropdown: FC<FacilitiesDropdownProps> = ({
       <Button
         onClick={() => setOpen((prev) => !prev)}
         variant="outline"
-        className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 py-4.5 h-auto"
+        className="w-full justify-between shadow-none rounded-xl border-gray-300 bg-gray-50 py-4.5 my-0 h-auto"
       >
         <span className={facilities.length ? "text-gray-900" : "text-gray-400"}>
           {facilities.length > 0 ? facilities.join(", ") : "Select facilities"}
@@ -69,14 +69,14 @@ export const FacilitiesDropdown: FC<FacilitiesDropdownProps> = ({
 
         {facilities.length > 0 ? (
           <X
-            className="h-4 w-4 opacity-60 hover:opacity-100"
+            className="h-4 w-4 opacity-50 hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               setFacilities([]);
             }}
           />
         ) : (
-          <ChevronDown className="h-4 w-4 opacity-60" />
+          <ChevronDown className="h-4 w-4 opacity-50 text-gray-400" />
         )}
       </Button>
 

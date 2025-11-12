@@ -31,14 +31,16 @@ import {
 } from "lucide-react";
 import Nav from "../common/Nav";
 import { ContactForm } from "../home/ContactForm";
-import PropertyTabs from "./PropertyTabs";
+import PropertyTabs from "../notUsed/PropertyTabs";
 import type { PropertyData, PropertyType } from "./PropertyCard.type";
 import { ImageCarousel } from "./ImageCarousel";
 import { useLocation } from "react-router-dom";
-import InfoCard from "./InfoCard";
-import ImageSlider from "./ImageSlider";
+import InfoCard from "../notUsed/InfoCard";
+import ImageSlider from "../notUsed/ImageSlider";
 import RowImageBars from "./RowImageBar";
 import { PropertyDetailContent } from "./PropertyDetailsContent";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import RecommendedPropertiesSection from "../RecomendedProperties/RecommendedPropertiesSection";
 
 export default function PropertyDetails() {
   const location = useLocation();
@@ -46,6 +48,7 @@ export default function PropertyDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useIsMobile(768);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -76,12 +79,16 @@ export default function PropertyDetails() {
       <div className="bg-blue h-17">
         <Nav />
       </div>
-      {/* Hero Image Section */}
-
-      <RowImageBars images={mockProperty.media.images} />
-
+      {/* Hero Image Section
+       */}
+      {isMobile ? (
+        <ImageCarousel images={mockProperty.media.images} />
+      ) : (
+        <RowImageBars images={mockProperty.media.images} />
+      )}
       {/* Content */}
       <PropertyDetailContent property={mockProperty} />
+
       {/* Bottom CTA */}
     </div>
   );

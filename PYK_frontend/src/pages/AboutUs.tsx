@@ -173,9 +173,8 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-black h-full border-5 border-black">
-        <Nav />
-      </div>
+      <Nav isBlack={true} />
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)]" />

@@ -46,7 +46,7 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
           setTempValue(value); // كل مرة يفتح يرجّع القيم الحالية
           setOpen(!open);
         }}
-        className="flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-14.5 bg-gray-50 transition w-full"
+        className="flex justify-between shadow-none items-center border border-gray-300 rounded-xl px-4 py-2 h-14.5 bg-gray-50 transition w-full"
       >
         {/* Text */}
 
@@ -60,8 +60,8 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
             : "Select Area Range"}
         </span>
         <ChevronDown
-          className={`h-4 w-4 text-gray-500 transition-transform ${
-            open ? "rotate-180" : ""
+          className={`h-4 w-4 text-gray-400   transition-transform ${
+            open ? "rotate-180" : "opacity-50"
           }`}
         />
       </Button>

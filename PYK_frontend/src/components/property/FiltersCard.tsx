@@ -21,6 +21,8 @@ import { AreaRangeFilter } from "./AreaRangeFilter";
 import { LocationDropdown } from "./LocationDropDown";
 import { FurnishingDropdown } from "./FurnishingDropdown";
 import { ContractDurationDropdown } from "./ContractDurationDropdown";
+import { DateRangeFilter } from "./DateRangeFilter";
+import { date } from "zod";
 
 export type ListingType = "primary" | "resale" | "rent";
 
@@ -37,6 +39,7 @@ export default function FiltersCard({
   setFilters,
   onApply,
 }: FiltersCardProps) {
+  const [isFirstRender, setIsFirstRender] = useState(true);
   const [showMore, setShowMore] = useState(false);
   const [keyword, setKeyword] = useState(filters.keyword || "");
   const [isFirstRenderPrice, setIsFirstRenderPrice] = useState(true);
@@ -57,13 +60,17 @@ export default function FiltersCard({
     setFilters({
       propertyType: "",
       location: null,
-      priceRange: [500000, 25000000],
-      areaRange: [100, 5000],
+      priceRange: [0, 100000000],
+      areaRange: [0, 5000],
       rooms: null,
       bathrooms: null,
       facilities: [],
       furnishing: null,
       contractDuration: null,
+      dateRange: {
+        from: null,
+        to: null,
+      },
       keyword: "",
       page: 1,
       limit: 9,
@@ -81,7 +88,7 @@ export default function FiltersCard({
       "New Cairo",
       "Zamalek",
     ],
-    Giza: ["Dokki", "Mohandessin", "October City", "Sheikh Zayed", "Haram"],
+    Giza: ["Dokki", "Mohandessin", "6th of October", "Sheikh Zayed", "Haram"],
     Alexandria: ["Smouha", "Stanley", "Gleem", "Miami", "Montaza"],
   };
 
@@ -137,9 +144,9 @@ export default function FiltersCard({
             <PriceRangeFilter
               value={filters.priceRange}
               onChange={(priceRange) => setFilters({ ...filters, priceRange })}
-              min={500000}
-              max={25000000}
-              step={100}
+              min={0}
+              max={100000000}
+              step={10000}
               isFirstRender={isFirstRenderPrice}
               setIsFirstRender={setIsFirstRenderPrice}
             />
@@ -175,17 +182,11 @@ export default function FiltersCard({
               <AreaRangeFilter
                 value={filters.areaRange}
                 onChange={(areaRange) => setFilters({ ...filters, areaRange })}
-                min={1000}
+                min={0}
                 max={5000}
                 step={100}
                 isFirstRender={isFirstRenderArea}
                 setIsFirstRender={setIsFirstRenderArea}
-              />
-              <FacilitiesDropdown
-                facilities={filters.facilities}
-                setFacilities={(facilities) =>
-                  setFilters({ ...filters, facilities })
-                }
               />
               <FurnishingDropdown
                 value={filters.furnishing}
@@ -193,13 +194,22 @@ export default function FiltersCard({
                   setFilters({ ...filters, furnishing })
                 }
               />
+              <FacilitiesDropdown
+                facilities={filters.facilities}
+                setFacilities={(facilities) =>
+                  setFilters({ ...filters, facilities })
+                }
+              />
+
               {listingType === "rent" && (
                 <>
-                  <ContractDurationDropdown
-                    value={filters.contractDuration}
-                    setValue={(contractDuration) =>
-                      setFilters({ ...filters, contractDuration })
+                  <DateRangeFilter
+                    filters={filters.dateRange}
+                    setFilters={(dateRange) =>
+                      setFilters({ ...filters, dateRange })
                     }
+                    isFirstRender={isFirstRender}
+                    setIsFirstRender={setIsFirstRender}
                   />
                 </>
               )}

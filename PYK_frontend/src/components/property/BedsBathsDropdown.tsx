@@ -45,7 +45,7 @@ export const BedsBathsDropdown: FC<BedsBathsDropdownProps> = ({
       <Button
         onClick={() => setOpen((prev) => !prev)}
         variant="outline"
-        className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 py-4.5 h-auto"
+        className="w-full justify-between shadow-none rounded-xl border-gray-300 bg-gray-50 py-4.5 h-auto"
       >
         <span
           className={rooms || bathrooms ? "text-gray-900" : "text-gray-400"}
@@ -65,7 +65,7 @@ export const BedsBathsDropdown: FC<BedsBathsDropdownProps> = ({
             }}
           />
         ) : (
-          <ChevronDown className="h-4 w-4 opacity-60" />
+          <ChevronDown className="h-4 w-4 opacity-60 text-gray-400" />
         )}
       </Button>
 

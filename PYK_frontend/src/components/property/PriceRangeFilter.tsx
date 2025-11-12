@@ -18,9 +18,9 @@ interface PriceRangeFilterProps {
 export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
   value,
   onChange,
-  min = 50000,
-  max = 25000000,
-  step = 10000,
+  min = 0,
+  max = 100000000,
+  step = 1000,
   isFirstRender,
   setIsFirstRender,
 }) => {
@@ -46,10 +46,10 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
       <Button
         variant="outline"
         onClick={() => {
-          setTempValue(value); // كل مرة يفتح يرجّع القيم الحالية
+          setTempValue(value);
           setOpen(!open);
         }}
-        className="flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-14 bg-gray-50 transition w-full"
+        className="flex justify-between shadow-none items-center border border-gray-300 rounded-xl px-auto py-4 h-auto bg-gray-50 transition w-full"
       >
         <span
           className={`${
@@ -61,8 +61,8 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
             : "Select Price Range"}
         </span>
         <ChevronDown
-          className={`h-4 w-4 text-gray-500 transition-transform ${
-            open ? "rotate-180" : ""
+          className={`h-4 w-4 text-gray-400 transition-transform ${
+            open ? "rotate-180" : "opacity-50"
           }`}
         />
       </Button>
@@ -83,7 +83,7 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
             <span className="text-gray-400">-</span>
             <input
               type="number"
-              value={tempValue[1] ?? 25000000}
+              value={tempValue[1] ?? 100000000}
               onChange={(e) =>
                 setTempValue([tempValue[0] ?? 0, +e.target.value])
               }
@@ -95,8 +95,8 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
           {/* Slider */}
           <Slider
             min={min}
-            max={25000000}
-            step={step}
+            max={max}
+            step={1000000}
             value={tempValue}
             onValueChange={(newValue) =>
               setTempValue([newValue[0], newValue[1]])
@@ -106,8 +106,8 @@ export const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
 
           {/* Values */}
           <div className="flex justify-between text-xs text-gray-500">
-            <span>{formatPrice(min)}</span>
-            <span>{formatPrice(max)}</span>
+            <span>{formatPrice(tempValue[0])}</span>
+            <span>{formatPrice(tempValue[1])}</span>
           </div>
 
           {/* Apply Button */}

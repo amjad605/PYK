@@ -22,7 +22,7 @@ export const FurnishingDropdown: FC<FurnishingDropdownProps> = ({
   return (
     <div className="flex flex-col">
       <Select value={value || ""} onValueChange={(val) => setValue(val)}>
-        <SelectTrigger className="w-full justify-between rounded-xl border-gray-300 bg-gray-50 h-auto py-7">
+        <SelectTrigger className="w-full shadow-none justify-between  transition rounded-xl border-gray-200 bg-gray-50 h-auto py-7 data-[placeholder]:font-medium data-[placeholder]:text-gray-400">
           <SelectValue placeholder="Select Finishing" />
           {value ? (
             <X className="cursor-pointer  h-4 w-4 opacity-50" />
@@ -32,7 +32,7 @@ export const FurnishingDropdown: FC<FurnishingDropdownProps> = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="Core & Shell">Core & Shell</SelectItem>
-          <SelectItem value="Semi-Finished">Semi-Finished"</SelectItem>
+          <SelectItem value="Semi-Finished">Semi-Finished</SelectItem>
           <SelectItem value="Finished">Finished</SelectItem>
           <SelectItem value="Furnished">Furnished</SelectItem>
         </SelectContent>

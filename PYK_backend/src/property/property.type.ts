@@ -99,8 +99,6 @@ export interface Areas {
 export interface PropertyLocation {
   city: string;
   district?: string;
-  compound?: string;
-  geo?: { type: "Point"; coordinates: [number, number] };
 }
 export interface DeveloperRef {
   id: Types.ObjectId;

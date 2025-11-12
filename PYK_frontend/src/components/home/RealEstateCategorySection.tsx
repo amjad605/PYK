@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 const categories = [
   {
     category: "primary" as const,
-    title: "For Primary",
+    title: "Primary",
     description:
       "Brand new constructions with the latest designs and cutting-edge technology.",
     imageUrl: img2,
@@ -17,14 +17,14 @@ const categories = [
 
   {
     category: "resale" as const,
-    title: "For Resale",
+    title: "Resale",
     description:
       "Explore pre-owned properties offering great value and established neighborhoods.",
     imageUrl: img4,
   },
   {
     category: "rent" as const,
-    title: "For Rent",
+    title: "Rent",
     description:
       "Discover premium rental properties with flexible lease terms and modern amenities.",
     imageUrl: img3,

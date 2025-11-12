@@ -45,7 +45,7 @@ export const RealEstateCategoryCard: FC<RealEstateCategoryCardProps> = ({
       {/* Content Container */}
       <div className="relative h-full flex flex-col justify-between p-6 text-white">
         {/* Category Badge */}
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <div className="px-4 py-1.5 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 text-xs font-medium uppercase tracking-wider text-white">
             {category}
           </div>
@@ -72,7 +72,7 @@ export const RealEstateCategoryCard: FC<RealEstateCategoryCardProps> = ({
             >
               {/* Button background effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-blue-300/10 to-purple-500/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
-              <span className="relative flex items-center justify-center gap-2">
+              <span className="relative text-blue flex items-center justify-center gap-2">
                 View Listings
                 <svg
                   className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"

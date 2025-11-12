@@ -13,6 +13,8 @@ import Navbar from "./components/common/NavBar";
 import PropertyDetails from "./components/property/PropertyDetails";
 import ScrollToTop from "./utils/ScrollTop";
 import WhatsAppButton from "./components/common/WhatsAppButton";
+import RentPage from "./pages/RentPage";
+import OwnerPage from "./pages/OwnerPage";
 function App() {
   return (
     <div className="relative ">
@@ -23,9 +25,10 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/:cat" element={<SellPage />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
-
+          <Route path="/rent" element={<RentPage />} />
+          <Route path="/rent/owner" element={<OwnerPage />} />
           <Route path="/properties" element={<PropertyPage />} />
-          <Route path="/about" element={<AboutUs />} />
+          <Route path="/about us" element={<AboutUs />} />
           <Route path="/Admin" element={<AdminPage />} />
         </Routes>
       </BrowserRouter>

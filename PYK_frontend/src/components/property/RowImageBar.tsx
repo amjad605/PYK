@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-const images = [
+const imagesmock = [
   "https://prod-images.nawy.com/processed/compound_image/image/11854/default.webp",
   "https://prod-images.nawy.com/processed/compound_image/image/11853/default.webp",
   "https://prod-images.nawy.com/processed/compound_image/image/11851/default.webp",
@@ -14,14 +14,14 @@ interface RowImageBarsProps {
   images: string[];
 }
 
-export default function RowImageBars() {
+export default function RowImageBars({ images }: RowImageBarsProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
   return (
     <>
       {/* الصف */}
-      <div className="flex w-full gap-1 h-[500px]">
+      <div className="flex w-full gap-1 h-[68vh]">
         {images.map((img, idx) => {
           const isActive = idx === activeIndex;
           return (

@@ -33,7 +33,7 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between rounded-lg border-gray-300 bg-gray-50 py-4 h-auto"
+            className="w-full shadow-none justify-between rounded-xl border-gray-300 bg-gray-50 py-4 h-auto"
           >
             <span className={location ? "text-gray-900" : "text-gray-400"}>
               {location || "Select location"}
@@ -47,7 +47,7 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
                 }}
               />
             ) : (
-              <ChevronDown className="h-4 w-4 opacity-60" />
+              <ChevronDown className="h-4 w-4 opacity-50 text-gray-400" />
             )}
           </Button>
         </DropdownMenuTrigger>

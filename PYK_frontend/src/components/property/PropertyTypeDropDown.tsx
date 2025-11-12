@@ -50,7 +50,7 @@ export const PropertyTypeDropdown: FC<PropertyTypeDropdownProps> = ({
           value={propertyType || ""}
           onValueChange={(value) => setPropertyType(value as PropertyType)}
         >
-          <SelectTrigger className="w-full justify-between rounded-lg border-gray-200 bg-gray-50 py-6.5 h-auto data-[placeholder]:font-medium data-[placeholder]:text-gray-400">
+          <SelectTrigger className="w-full justify-between rounded-xl shadow-none border-gray-200 bg-gray-50 py-6.5 h-auto data-[placeholder]:font-medium data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Property type" />
             {propertyType ? (
               <X className="cursor-pointer  h-4 w-4 opacity-50" />

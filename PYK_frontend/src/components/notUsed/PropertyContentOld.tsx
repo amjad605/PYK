@@ -24,7 +24,7 @@ import { Card, CardContent } from "../ui/card";
 import InfoCard from "./InfoCard";
 import PropertyTabs from "./PropertyTabs";
 
-import type { PropertyData, PropertyType } from "./PropertyCard.type";
+import type { PropertyData, PropertyType } from "../property/PropertyCard.type";
 interface PropertyDetailProps {
   mockProperty: PropertyData;
   activeTab: string;

@@ -49,7 +49,6 @@ export function PropertyCardSkeleton() {
         </div>
 
         {/* Button Skeleton */}
-        <div className="w-full h-10 bg-gray-300 rounded-xl" />
       </CardContent>
     </Card>
   );

@@ -15,16 +15,18 @@ import {
   Shield,
   Waves,
   Trees,
-  Calendar,
   Building,
   Sparkles,
   LandPlot,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PropertyData } from "@/components/property/PropertyCard.type";
+import { divIcon } from "leaflet";
+import { Calendar } from "../ui/calendar";
 function calculateInstallment(price: Price): number | null {
   if (!price.amount || !price.paymentPlan) return null;
 
@@ -97,7 +99,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY < 650);
+      setIsScrolled(window.scrollY < 500);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -129,7 +131,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
               <CardContent className="p-6">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="space-y-2">
-                    <h1 className="text-2xl md:text-3xl font-bold text-balance bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                    <h1 className="text-2xl md:text-3xl font-bold text-balance bg-blue bg-clip-text text-transparent">
                       {property.title}
                     </h1>
                     <div className="flex items-center gap-2 text-slate-600">
@@ -201,7 +203,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         {property.bedrooms && (
                           <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                             <Bed className="h-4 w-4 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-700">
+                            <span className="text-sm md:text-md font-bold text-blue-900">
                               {property.bedrooms}
                             </span>
                             <span className="text-xs text-slate-600">
@@ -212,7 +214,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         {property.bathrooms && (
                           <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                             <Bath className="h-4 w-4 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-900">
+                            <span className="text-sm md:text-md  font-bold text-blue-900">
                               {property.bathrooms}
                             </span>
                             <span className="text-xs text-slate-600">
@@ -223,7 +225,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         {property.areas.total ? (
                           <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                             <Home className="h-4 w-4 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-900">
+                            <span className="text-sm md:text-md font-bold text-blue-900">
                               {formatArea(property.areas.total)}
                             </span>
                             <span className="text-xs text-slate-600">
@@ -235,7 +237,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         )}
                         <div className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg bg-blue-50">
                           <Square className="h-4 w-4 text-blue-600" />
-                          <span className="text-md font-bold text-blue-700">
+                          <span className="text-sm md:text-md  font-bold text-blue-900">
                             {formatArea(property.areas.builtUp)}
                           </span>
                           <span className="text-xs text-slate-600">
@@ -245,7 +247,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         {property.areas.land ? (
                           <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                             <LandPlot className="h-4 w-4 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-900">
+                            <span className="text-sm md:text-md  font-bold text-blue-900">
                               {formatArea(property.areas.land)}
                             </span>
                             <span className="text-xs text-slate-600">
@@ -258,7 +260,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         {property.areas.garden ? (
                           <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                             <Trees className="h-4 w-4 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-900">
+                            <span className="text-sm md:text-md  font-bold text-blue-900">
                               {formatArea(property.areas.garden)}
                             </span>
                             <span className="text-xs text-slate-600">
@@ -296,11 +298,11 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.2, delay: 0.0 }}
           >
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-blue-700 flex items-center gap-2">
+                <CardTitle className="text-xl text-blue flex items-center gap-2">
                   <Building className="h-5 w-5" />
                   Property Information
                 </CardTitle>
@@ -336,33 +338,24 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                           </td>
                         </tr>
                       )}
-                      {property.furnishing && (
-                        <tr>
-                          <td className="px-4 py-3 text-sm font-medium text-slate-600">
-                            Furnishing
-                          </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-slate-900">
-                            {furnishingLabels[property.furnishing]}
-                          </td>
-                        </tr>
-                      )}
+
                       {property.deliveryDate && (
-                        <tr className="bg-blue-50">
+                        <tr>
                           <td className="px-4 py-3 text-sm font-medium text-slate-600">
                             Delivery Date
                           </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-blue-700 flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
+                          <td className="px-4 py-3 text-sm font-semibold text-slate-900 flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4" />
                             {new Date(property.deliveryDate).getFullYear()}
                           </td>
                         </tr>
                       )}
                       {property.developer?.name && (
-                        <tr>
+                        <tr className="bg-blue-50">
                           <td className="px-4 py-3 text-sm font-medium text-slate-600">
                             Developer
                           </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-slate-900">
+                          <td className="px-4 py-3 text-sm font-semibold text-blue-700">
                             {property.developer.name}
                           </td>
                         </tr>
@@ -374,7 +367,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                 {/* Description */}
                 {property.description && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-blue-700">
+                    <h3 className="text-lg font-semibold text-blue">
                       Description
                     </h3>
                     <div className="relative">
@@ -421,7 +414,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
           >
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl text-blue-700">
+                <CardTitle className="text-xl text-blue">
                   Facilities & Features
                 </CardTitle>
               </CardHeader>
@@ -445,7 +438,7 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="text-md font-semibold text-blue-700">
+                  <h4 className="text-md font-semibold text-blue">
                     Additional Features
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -475,8 +468,10 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
             <Card className="border-0 shadow-lg bg-blue text-white overflow-hidden">
               <CardContent className="p-6 space-y-6">
                 {/* Main layout: Payment plan + Contact Form */}
+
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Payment Info */}
+
                   <div className="flex-1 p-4 bg-white/10 backdrop-blur-sm rounded-xl space-y-3 border border-white/20">
                     {property.price.amount && (
                       <div className="flex justify-between items-center">
@@ -526,6 +521,16 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
                         <span className="font-semibold">
                           {property.price.paymentPlan.installments.years} years
                         </span>
+                      </div>
+                    )}
+                    {property.propertyType === "rent" && (
+                      <div className="w-full flex justify-center py-6">
+                        <div className="rounded-2xl border border-gray-200 shadow-lg p-4 sm:p-6">
+                          <Calendar
+                            numberOfMonths={2}
+                            className="rounded-lg border-none shadow-none [&_.rdp-caption_label]:font-medium [&_.rdp-day_selected]:bg-blue-600 [&_.rdp-day_selected]:text-white [&_.rdp-day_today]:border-blue-500 [&_.rdp-day_today]:text-blue-600"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, MapPin, ArrowLeft, Home } from "lucide-react";
 import image from "../assets/cozy-family-duplex.png";
 import FiltersCard from "@/components/property/FiltersCard";
-import PropertyCard from "@/components/property/PropertyCard";
+import PropertyCard from "@/components/notUsed/PropertyCard";
 import type { Property } from "@/components/property/PropertyCard.type";
 
 // Mock property data

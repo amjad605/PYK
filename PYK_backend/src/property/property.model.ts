@@ -113,11 +113,6 @@ const PropertySchema = new Schema<IPropertyDoc>(
     location: {
       city: { type: String, required: true },
       district: String,
-      compound: String,
-      geo: {
-        type: { type: String, enum: ["Point"], default: "Point" },
-        coordinates: { type: [Number], index: "2dsphere" },
-      },
     },
     compoundId: { type: Schema.Types.ObjectId, ref: "Compound", default: null },
     media: {
