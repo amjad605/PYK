@@ -88,7 +88,7 @@ export interface Location {
 export interface Media {
   images: string[];
   videos: string[];
-  floorPlans: string[];
+  floorPlans?: string[];
 }
 
 export interface Developer {

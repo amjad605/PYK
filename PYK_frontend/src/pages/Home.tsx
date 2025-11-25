@@ -26,7 +26,6 @@ export default function Home(): JSX.Element {
       <main aria-label="Main content">
         <RealEstateCategorySection />
         <ValueSection />
-
         <ChooseUs />
         <ContactUs />
       </main>

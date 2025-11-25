@@ -58,14 +58,14 @@ export interface Media {
   images: string[];
   floorPlans: string[];
 }
-
+export type Status = "active" | "sold" | "rented" | "inactive" | "pending";
 export interface PropertyFormData {
   listingType: ListingType | "";
   propertyType: PropertyType | "";
   unitLevel?: UnitLevel | "";
   title: string;
   description?: string;
-  status: "available" | "sold" | "rented" | "reserved" | "";
+  status: Status;
   areas: Areas;
   price: Price;
   bedrooms?: number;

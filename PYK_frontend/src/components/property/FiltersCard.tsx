@@ -285,6 +285,8 @@ export default function FiltersCard({
                 min={1000}
                 max={5000}
                 step={100}
+                isFirstRender={isFirstRenderArea}
+                setIsFirstRender={setIsFirstRenderArea}
               />
               <PriceRangeFilter
                 value={filters.priceRange}
@@ -294,6 +296,8 @@ export default function FiltersCard({
                 min={1000}
                 max={5000}
                 step={100}
+                isFirstRender={isFirstRenderPrice}
+                setIsFirstRender={setIsFirstRenderPrice}
               />
 
               {listingType === "rent" && (

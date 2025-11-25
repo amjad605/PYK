@@ -29,9 +29,13 @@ export const useProperty = (filters?: Record<string, any>) => {
           });
         }
 
-        const { data } = await axios.get(
+        const response = await axios.get(
           `/property/filter?${params.toString()}`
         );
+        const data = response.data as {
+          data: any[];
+          pagination: { total: number };
+        };
 
         const propertiesArray = data.data ?? [];
         setTotalCount(data.pagination.total ?? 0);

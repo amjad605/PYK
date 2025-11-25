@@ -89,8 +89,8 @@ export default function SellPage() {
   }, [category]);
 
   /* -------------------------
-     filters -> URL (sync)
-     - Use replace: true to avoid adding to browser history
+    filters -> URL (sync)
+    - Use replace: true to avoid adding to browser history
      ------------------------- */
   useEffect(() => {
     // Don't update URL during back/forward navigation
@@ -107,7 +107,7 @@ export default function SellPage() {
   }, [filters, setSearchParams]);
 
   /* -------------------------
-     URL -> filters (sync for back/forward/manual edits)
+    URL -> filters (sync for back/forward/manual edits)
      ------------------------- */
   useEffect(() => {
     const current = searchParams.toString();
@@ -175,7 +175,7 @@ export default function SellPage() {
   );
 
   /* -------------------------
-     Fetch data
+    Fetch data
      ------------------------- */
   const {
     data: properties = [],
@@ -190,7 +190,7 @@ export default function SellPage() {
   );
 
   /* -------------------------
-     Render
+    Render
      ------------------------- */
   return (
     <div className="min-h-screen bg-stone-50">
@@ -215,7 +215,7 @@ export default function SellPage() {
         properties={properties}
         totalCount={totalCount}
         loading={loading}
-        error={error}
+
       />
 
       {/* Pagination */}

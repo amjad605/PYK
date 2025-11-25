@@ -2,7 +2,7 @@
 
 import Nav from "@/components/common/Nav";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 const TargetIcon = () => (
   <svg
@@ -88,6 +88,12 @@ const CustomButton = ({
   variant = "default",
   size = "default",
   ...props
+}: {
+  children?: ReactNode;
+  className?: string;
+  variant?: "default" | "outline";
+  size?: "default" | "lg";
+  [key: string]: unknown;
 }) => {
   const baseClasses =
     "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background";
@@ -113,7 +119,7 @@ const CustomButton = ({
   );
 };
 
-const CustomCard = ({ children, className = "" }) => (
+const CustomCard = ({ children, className = "" }: { children?: ReactNode; className?: string }) => (
   <div
     className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}
   >
@@ -121,9 +127,13 @@ const CustomCard = ({ children, className = "" }) => (
   </div>
 );
 
-const CustomCardContent = ({ children, className = "" }) => (
-  <div className={`p-6 ${className}`}>{children}</div>
-);
+const CustomCardContent = ({
+  children,
+  className = "",
+}: {
+  children?: ReactNode;
+  className?: string;
+}) => <div className={`p-6 ${className}`}>{children}</div>;
 
 export default function AboutPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dashboard } from "./Dashboard";
-import AddPropertyPage from "./Addproperty";
+
 
 const AdminPage = () => {
   const [active, setActive] = useState<string>("property");
