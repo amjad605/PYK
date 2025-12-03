@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import logo from "../assets/PYK INVEST Brand identity-23.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -93,10 +93,10 @@ const SignupPage = () => {
             toast.success("Signup successful!");
 
             // Save to localStorage
-            localStorage.setItem("token", data.token);
+            localStorage.setItem("adminToken", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
-            navigate("/Admin");
+            navigate("/admin");
         } catch (error: any) {
             setLoading(false);
 
@@ -227,7 +227,7 @@ const SignupPage = () => {
                 {/* Already Have Account */}
                 <p className="text-center text-sm text-gray-600 mt-6">
                     Already have an account?{" "}
-                    <Link to={"/login"} className="text-blue font-medium hover:underline">
+                    <Link to={"/admin/login"} className="text-blue font-medium hover:underline">
                         Login
                     </Link>
                 </p>

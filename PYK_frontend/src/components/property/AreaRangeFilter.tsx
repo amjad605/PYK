@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
 
 interface AreaRangeFilterProps {
-  value: [number, number];
+  value: [number | null, number | null];
   onChange: (range: [number | null, number | null]) => void;
   min?: number;
   max?: number;
@@ -25,7 +25,7 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
   setIsFirstRender,
 }) => {
   const [open, setOpen] = useState(false);
-  const [tempValue, setTempValue] = useState<[number, number]>([min, max]);
+  const [tempValue, setTempValue] = useState<[number | null, number | null]>([min, max]);
 
   const formatArea = (area: number) => {
     return `${area.toLocaleString()} m²`;
@@ -43,7 +43,7 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
       <Button
         variant="outline"
         onClick={() => {
-          setTempValue(value); // كل مرة يفتح يرجّع القيم الحالية
+          setTempValue(value);
           setOpen(!open);
         }}
         className="flex justify-between shadow-none items-center border border-gray-300 rounded-xl px-4 py-2 h-14.5 bg-gray-50 transition w-full"
@@ -51,18 +51,16 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
         {/* Text */}
 
         <span
-          className={`${
-            !isFirstRender ? "text-gray-700" : "text-gray-400"
-          } font-medium text-sm`}
+          className={`${!isFirstRender ? "text-gray-700" : "text-gray-400"
+            } font-medium text-sm`}
         >
           {!isFirstRender
-            ? `${formatArea(value[0])} - ${formatArea(value[1])}`
+            ? `${formatArea(value[0] ?? 0)} - ${formatArea(value[1] ?? 0)}`
             : "Select Area Range"}
         </span>
         <ChevronDown
-          className={`h-4 w-4 text-gray-400   transition-transform ${
-            open ? "rotate-180" : "opacity-50"
-          }`}
+          className={`h-4 w-4 text-gray-400   transition-transform ${open ? "rotate-180" : "opacity-50"
+            }`}
         />
       </Button>
 
@@ -96,7 +94,7 @@ export const AreaRangeFilter: React.FC<AreaRangeFilterProps> = ({
             min={min}
             max={max}
             step={step}
-            value={tempValue}
+            value={tempValue[0] !== null && tempValue[1] !== null ? [tempValue[0], tempValue[1]] : [min, max]}
             onValueChange={(newValue) =>
               setTempValue([newValue[0], newValue[1]])
             }

@@ -138,27 +138,4 @@ export interface PropertyData {
   updatedAt?: string;
 }
 
-export interface PropertyFilters {
-  search?: string;
-  listingType?: string;
-  propertyType?: string;
-  city?: string;
-  compound?: string;
-  developer?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minArea?: number;
-  maxArea?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  furnishing?: string;
-  status?: string;
-  facilities?: string[];
-}
 
-export interface PaginationInfo {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}

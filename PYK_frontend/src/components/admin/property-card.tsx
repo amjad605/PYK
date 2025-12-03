@@ -4,7 +4,7 @@ import { Edit2, Trash2, MapPin, Bed, Bath, Ruler as Ruler2, Home } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { PropertyData, Status } from '@/components/property/PropertyCard.type';
+import type { PropertyData, Status } from '@/types/property';
 
 interface PropertyCardProps {
   property: PropertyData;
@@ -17,6 +17,8 @@ const statusColors: Record<Status, string> = {
   sold: 'bg-blue-100 text-blue-800 border-blue-300',
   rented: 'bg-purple-100 text-purple-800 border-purple-300',
   reserved: 'bg-gray-100 text-gray-800 border-gray-300',
+  pending: 'bg-red-100 text-red-800 border-red-300',
+
 
 };
 
@@ -134,17 +136,17 @@ export function PropertyCard({ property, onEdit, onDelete }: PropertyCardProps) 
         </div>
 
         {/* Features/Facilities */}
-        {(property.features.length > 0 || property.facilities.length > 0) && (
+        {((property.features?.length ?? 0) > 0 || (property.facilities?.length ?? 0) > 0) && (
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
-              {[...property.features, ...property.facilities].slice(0, 3).map((item, idx) => (
+              {[...(property.features ?? []), ...(property.facilities ?? [])].slice(0, 3).map((item, idx) => (
                 <Badge key={idx} variant="secondary" className="text-xs">
                   {item}
                 </Badge>
               ))}
-              {property.features.length + property.facilities.length > 3 && (
+              {(property.features?.length ?? 0) + (property.facilities?.length ?? 0) > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{property.features.length + property.facilities.length - 3}
+                  +{(property.features?.length ?? 0) + (property.facilities?.length ?? 0) - 3}
                 </Badge>
               )}
             </div>
@@ -152,10 +154,9 @@ export function PropertyCard({ property, onEdit, onDelete }: PropertyCardProps) 
         )}
 
         {/* Additional Info */}
-        {(property.developer || property.furnishing || property.finishing) && (
+        {(property.developer || property.finishing) && (
           <div className="mb-4 space-y-1 text-xs text-muted-foreground">
             {property.developer && <p>Developer: {property.developer.name}</p>}
-            {property.furnishing && <p>Furnishing: {property.furnishing}</p>}
             {property.finishing && <p>Finishing: {property.finishing}</p>}
           </div>
         )}
@@ -175,7 +176,7 @@ export function PropertyCard({ property, onEdit, onDelete }: PropertyCardProps) 
             variant="destructive"
             size="sm"
             className="flex-1 gap-2"
-            onClick={() => onDelete(property.id)}
+            onClick={() => onDelete(property.id!)}
           >
             <Trash2 className="w-4 h-4" />
             <span className="hidden sm:inline">Delete</span>

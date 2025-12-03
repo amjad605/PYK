@@ -1,7 +1,5 @@
 import type { JSX } from "react";
-import type { PropertyData } from "./PropertyCard.type";
-import { PropertyCardNew } from "./PropertyCardNew";
-import { PropertyCardSkeleton } from "./PropertyCardSkeleton";
+import type { PropertyData } from "@/types/property";
 import PropertyCard from "../notUsed/PropertyCard";
 import PropertyCardSkeletonOld from "../notUsed/PropertyCardSkeletonOld";
 interface PropertyCardListViewProps {
@@ -23,19 +21,19 @@ const PropertyCardListView = (
             {props.loading
               ? "Loading properties..."
               : props.properties.length > 0
-              ? `Showing 1-${props.properties.length} of ${props.totalCount} properties`
-              : "No properties available."}
+                ? `Showing 1-${props.properties.length} of ${props.totalCount} properties`
+                : "No properties available."}
           </p>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xxl:grid-cols-4 gap-8">
         {props.loading
           ? Array.from({ length: 10 }).map((_, index) => (
-              <PropertyCardSkeletonOld key={index} />
-            ))
+            <PropertyCardSkeletonOld key={index} />
+          ))
           : props.properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+            <PropertyCard key={property.id} property={property} />
+          ))}
       </div>
     </section>
   );

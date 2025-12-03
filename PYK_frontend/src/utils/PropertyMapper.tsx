@@ -1,4 +1,4 @@
-import type { PropertyData } from ".././components/property/PropertyCard.type";
+import type { PropertyData } from "@/types/property";
 
 export const mapPropertyFromApi = (doc: any): PropertyData => {
   return {
@@ -37,15 +37,12 @@ export const mapPropertyFromApi = (doc: any): PropertyData => {
       city: doc.location?.city,
       district: doc.location?.district,
       compound: doc.location?.compound,
-      geo: doc.location?.geo && {
-        type: doc.location.geo.type,
-        coordinates: doc.location.geo.coordinates,
-      },
+
     },
-    compoundId: doc.compoundId ?? undefined,
+
     media: {
       images: doc.media?.images ?? [],
-      videos: doc.media?.videos ?? [],
+
       floorPlans: doc.media?.floorPlans ?? [],
     },
     developer: doc.developer && {
@@ -60,7 +57,7 @@ export const mapPropertyFromApi = (doc: any): PropertyData => {
         email: doc.owner.contact?.email,
       },
     },
-    furnishing: doc.furnishing,
+
     finishing: doc.finishing,
     rentDetails: doc.rentDetails && {
       leaseTerm: doc.rentDetails.leaseTerm,

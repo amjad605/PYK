@@ -1,7 +1,6 @@
 "use client";
 
-import { FC } from "react";
-import { Clock } from "lucide-react";
+import type { FC } from "react";
 import {
   Select,
   SelectTrigger,

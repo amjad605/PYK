@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "../lib/axios";
-import type { PropertyData } from "../components/property/PropertyCard.type";
+import type { PropertyData } from "@/types/property";
 import { mapPropertyFromApi } from "../utils/PropertyMapper";
 
 export const useProperty = (filters?: Record<string, any>) => {

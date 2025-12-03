@@ -1,10 +1,6 @@
-import React from "react";
 
-import cozyVilla from "../../assets/cozy-family-duplex.png";
-import modernvilla from "../../assets/luxury-downtown-apartment.png";
-import luxuryApartment from "../../assets/luxury-downtown-apartment.png";
 import PropertyCard from "../notUsed/PropertyCard";
-import { type PropertyData } from "../property/PropertyCard.type";
+import { type PropertyData } from "../../types/property";
 
 function RecommendedPropertiesSection() {
   // Supporting interfaces
@@ -15,7 +11,7 @@ function RecommendedPropertiesSection() {
   const mockProperty: PropertyData = {
     id: "prop-12345",
     listingType: "resale",
-    propertyType: "apartment",
+    propertyType: "Apartment",
     unitLevel: "ground",
     title: "Luxury 3-Bedroom Apartment with Sea View",
     description:
@@ -50,23 +46,23 @@ function RecommendedPropertiesSection() {
       district: "123 Coastal Avenue",
       city: "Dubai",
     },
-    compoundId: "comp-67890",
+
     media: {
+      floorPlans: [],
       images: [
         "https://images.unsplash.com/photo-1605146769289-440113cc3d00?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         "https://images.unsplash.com/photo-1605146769289-440113cc3d00?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       ],
-      videos: ["https://example.com/virtual-tour.mp4"],
+
     },
     developer: {
-      id: "dev-54321",
+
       name: "Emaar Properties",
     },
     deliveryDate: "2024-12-01",
-    owner: {
-      name: "Ahmed Hassan",
-    },
-    finishing: "finished",
+    owner: "Ahmed Hassan",
+
+    finishing: "Finished",
   };
 
   // Additional mock data for different property types

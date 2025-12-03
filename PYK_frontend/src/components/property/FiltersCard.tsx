@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,15 +22,16 @@ import { LocationDropdown } from "./LocationDropDown";
 import { FurnishingDropdown } from "./FurnishingDropdown";
 import { ContractDurationDropdown } from "./ContractDurationDropdown";
 import { DateRangeFilter } from "./DateRangeFilter";
-import { date } from "zod";
+import type { FiltersType } from "@/types/filters";
+
 
 export type ListingType = "primary" | "resale" | "rent";
 
 interface FiltersCardProps {
   listingType: string | undefined;
-  filters: Record<string, any>;
-  setFilters: (filters: Record<string, any>) => void;
-  onApply: () => void;
+  filters: FiltersType;
+  setFilters: React.Dispatch<React.SetStateAction<FiltersType>>;
+  onApply: (newFilters: Partial<FiltersType>) => void;
 }
 
 export default function FiltersCard({
@@ -48,8 +49,9 @@ export default function FiltersCard({
   useEffect(() => {
     const handler = setTimeout(() => {
       if (keyword !== filters.keyword) {
-        setFilters({ ...filters, keyword });
-        onApply();
+        const updated = { ...filters, keyword };
+        setFilters(updated);
+        onApply(updated); // ✔ send NEW filters
       }
     }, 800);
 
@@ -65,7 +67,7 @@ export default function FiltersCard({
       rooms: null,
       bathrooms: null,
       facilities: [],
-      furnishing: null,
+      finishing: null,
       contractDuration: null,
       dateRange: {
         from: null,
@@ -130,20 +132,25 @@ export default function FiltersCard({
 
             <LocationDropdown
               location={filters.location}
-              setLocation={(location) => setFilters({ ...filters, location })}
+              setLocation={(location) => setFilters(prev => ({ ...prev, location, page: 1 }))}
               egyptLocations={egyptLocations}
             />
             <PropertyTypeDropdown
               propertyType={filters.propertyType}
               setPropertyType={(propertyType) => {
-                setFilters({ ...filters, propertyType });
-                onApply();
+                const updated = { ...filters, propertyType, page: 1 };
+                setFilters(updated);
+                onApply(updated);   // ✔ correct
               }}
-              clearFilter={() => setFilters({ ...filters, propertyType: "" })}
+              clearFilter={() => {
+                const updated: FiltersType = { ...filters, propertyType: "" };
+                setFilters(updated);
+                onApply(updated);   // ✔ correct
+              }}
             />
             <PriceRangeFilter
               value={filters.priceRange}
-              onChange={(priceRange) => setFilters({ ...filters, priceRange })}
+              onChange={(priceRange) => setFilters(prev => ({ ...prev, priceRange, page: 1 }))}
               min={0}
               max={100000000}
               step={10000}
@@ -174,14 +181,14 @@ export default function FiltersCard({
               <BedsBathsDropdown
                 rooms={filters.rooms}
                 bathrooms={filters.bathrooms}
-                setRooms={(rooms) => setFilters({ ...filters, rooms })}
+                setRooms={(rooms) => setFilters(prev => ({ ...prev, rooms, page: 1 }))}
                 setBathrooms={(bathrooms) =>
                   setFilters({ ...filters, bathrooms })
                 }
               />
               <AreaRangeFilter
                 value={filters.areaRange}
-                onChange={(areaRange) => setFilters({ ...filters, areaRange })}
+                onChange={(areaRange) => setFilters(prev => ({ ...prev, areaRange, page: 1 }))}
                 min={0}
                 max={5000}
                 step={100}
@@ -189,15 +196,15 @@ export default function FiltersCard({
                 setIsFirstRender={setIsFirstRenderArea}
               />
               <FurnishingDropdown
-                value={filters.furnishing}
-                setValue={(furnishing) =>
-                  setFilters({ ...filters, furnishing })
+                value={filters.finishing}
+                setValue={(finishing) =>
+                  setFilters(prev => ({ ...prev, finishing, page: 1 }))
                 }
               />
               <FacilitiesDropdown
                 facilities={filters.facilities}
                 setFacilities={(facilities) =>
-                  setFilters({ ...filters, facilities })
+                  setFilters(prev => ({ ...prev, facilities, page: 1 }))
                 }
               />
 
@@ -303,9 +310,9 @@ export default function FiltersCard({
               {listingType === "rent" && (
                 <>
                   <FurnishingDropdown
-                    value={filters.furnishing}
-                    setValue={(furnishing) =>
-                      setFilters({ ...filters, furnishing })
+                    value={filters.finishing}
+                    setValue={(finishing) =>
+                      setFilters({ ...filters, finishing })
                     }
                   />
                   <ContractDurationDropdown

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC } from "react";
-import { ChevronDown, ChevronUp, Home, X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -9,18 +9,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import type { PropertyType } from "@/types/property";
 
-export type PropertyType =
-  | "Apartment"
-  | "House"
-  | "Villa"
-  | "Condo"
-  | "Townhouse"
-  | "Twinhouse"
-  | "Duplex"
-  | "Penthouse"
-  | "Studio"
-  | "";
+
 
 interface PropertyTypeDropdownProps {
   propertyType: PropertyType;
@@ -47,13 +38,20 @@ export const PropertyTypeDropdown: FC<PropertyTypeDropdownProps> = ({
     <div className="flex flex-col">
       <div className="relative w-full">
         <Select
-          value={propertyType || ""}
-          onValueChange={(value) => setPropertyType(value as PropertyType)}
+          value={propertyType}
+          onValueChange={(value) => {
+            setPropertyType(value as PropertyType);
+            console.log("Selected property type:", value);
+
+          }}
         >
           <SelectTrigger className="w-full justify-between rounded-xl shadow-none border-gray-200 bg-gray-50 py-6.5 h-auto data-[placeholder]:font-medium data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Property type" />
             {propertyType ? (
-              <X className="cursor-pointer  h-4 w-4 opacity-50" />
+              <X className="cursor-pointer  h-4 w-4 opacity-50" onClick={(e) => {
+                e.stopPropagation();
+                clearFilter();
+              }} />
             ) : (
               <ChevronDown className="h-4 w-4 opacity-50" />
             )}

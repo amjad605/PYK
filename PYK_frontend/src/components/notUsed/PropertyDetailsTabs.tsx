@@ -26,7 +26,7 @@ import {
   Users,
   Clock,
 } from "lucide-react";
-import type { PropertyData } from "../property/PropertyCard.type";
+import type { PropertyData } from "@/types/property";
 
 interface PropertyDetailsPageProps {
   property: PropertyData;
@@ -116,9 +116,8 @@ const PropertyDetailsTab: FC<PropertyDetailsPageProps> = ({ property }) => {
                   className="hidden sm:flex"
                 >
                   <Heart
-                    className={`h-4 w-4 ${
-                      isLiked ? "fill-red-500 text-red-500" : ""
-                    }`}
+                    className={`h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""
+                      }`}
                   />
                 </Button>
                 <Button

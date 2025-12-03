@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Heart, MapPin, Bed, Bath, Square } from "lucide-react";
-import { type PropertyData } from "../property/PropertyCard.type";
+import { MapPin, Bed, Bath, Square } from "lucide-react";
+import { type PropertyData } from "@/types/property";
 import { useNavigate } from "react-router-dom";
 import formatPrice from "@/utils/formatPrice";
 import { Badge } from "../ui/badge";
@@ -41,9 +41,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           src={property.media.images[0] || "/placeholder.svg"}
           loading="lazy"
           alt={property.title}
-          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
-            imageLoaded ? "opacity-100" : "opacity-0"
-          }`}
+          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
           onLoad={() => setImageLoaded(true)}
         />
         {!imageLoaded && (
@@ -89,9 +88,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
               <Square className="h-4 w-4 mr-1" />
               <span>{property.areas.builtUp} sqft</span>
             </div>
-            {property.facilities.length > 4 && (
+            {property.facilities!.length > 4 && (
               <div className="flex items-center bg-gray-100 rounded-full px-2 py-1 text-xs text-gray-600">
-                +{property.facilities.length - 4} more
+                +{property.facilities!.length - 4} more
               </div>
             )}
           </div>

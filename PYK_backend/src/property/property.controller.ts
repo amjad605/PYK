@@ -36,5 +36,10 @@ class PropertyController {
     const result = await propertyService.createProperty(property);
     res.json(result);
   });
+  deleteProperty = AsyncWrapper(async (req: Request, res: Response, next) => {
+    const propertyId = req.params.id;
+    await propertyService.deleteProperty(propertyId);
+    res.status(204).send();
+  });
 }
 export default new PropertyController();

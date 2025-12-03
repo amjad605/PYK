@@ -73,7 +73,7 @@ const PropertySchema = new Schema<IPropertyDoc>(
         "apartment",
         "villa",
         "townhouse",
-        "twin_house",
+        "twinhouse",
         "duplex",
         "penthouse",
         "studio",

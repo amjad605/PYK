@@ -55,7 +55,7 @@ const LoginPage = () => {
             toast.success("Login successful!");
 
             // Save to localStorage
-            localStorage.setItem("token", data.token);
+            localStorage.setItem("adminToken", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
             navigate("/Admin");
@@ -178,10 +178,10 @@ const LoginPage = () => {
                 {/* Signup */}
                 <p className="text-center text-sm text-gray-600">
                     Don't have an account?{" "}
-                    <Link to={'/signup'} className="text-blue font-medium hover:underline">Sign Up</Link>
+                    <Link to={'/admin/signup'} className="text-blue font-medium hover:underline">Sign Up</Link>
                 </p>
             </div>
-        </div>
+        </div >
     );
 };
 

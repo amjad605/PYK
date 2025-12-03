@@ -5,11 +5,8 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
+import type { DateRange } from "@/types/property";
 
-interface DateRange {
-  from: Date | null;
-  to: Date | null;
-}
 
 interface DateRangeFilterProps {
   filters: DateRange;
@@ -58,18 +55,16 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         className="flex justify-between items-center border border-gray-300 rounded-xl px-4 py-2 h-14.5 bg-gray-50 w-full transition shadow-none"
       >
         <span
-          className={`${
-            !isFirstRender ? "text-gray-700" : "text-gray-400"
-          } font-medium text-sm`}
+          className={`${!isFirstRender ? "text-gray-700" : "text-gray-400"
+            } font-medium text-sm`}
         >
           {displayText}
         </span>
         <div className="flex items-center gap-1 text-gray-400">
           <CalendarIcon size={16} />
           <ChevronDown
-            className={`h-4 w-4 transition-transform ${
-              open ? "rotate-180 opacity-70" : "opacity-50"
-            }`}
+            className={`h-4 w-4 transition-transform ${open ? "rotate-180 opacity-70" : "opacity-50"
+              }`}
           />
         </div>
       </Button>
@@ -79,7 +74,10 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         <div className="absolute mt-2 bg-white border border-gray-200 rounded-xl z-10 p-4 w-[300px]">
           <Calendar
             mode="range"
-            selected={tempRange}
+            selected={{
+              from: tempRange.from ?? undefined,
+              to: tempRange.to ?? undefined,
+            }}
             onSelect={(range) =>
               setTempRange({
                 from: range?.from ?? null,

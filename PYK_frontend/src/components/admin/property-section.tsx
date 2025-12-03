@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PropertyCard } from './property-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import type { PropertyData } from "@/components/property/PropertyCard.type";
+import type { PropertyData } from "@/types/property";
 
 interface PropertySectionProps {
   properties: PropertyData[];

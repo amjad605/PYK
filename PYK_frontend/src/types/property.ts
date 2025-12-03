@@ -1,18 +1,19 @@
 export type ListingType = "primary" | "resale" | "rent";
 export type Finishing =
-  | "finished"
-  | "semi-finished"
-  | "core-shell"
-  | "red-brick"
-  | "luxury-finished";
+  | "Core-Shell"
+  | "Semi-Finished"
+  | "Finished"
+  | "Furnished";
 export type PropertyType =
-  | "apartment"
-  | "villa"
-  | "townhouse"
-  | "twin_house"
-  | "duplex"
-  | "penthouse"
-  | "studio";
+  | "Apartment"
+  | "House"
+  | "Villa"
+  | "Townhouse"
+  | "Twinhouse"
+  | "Duplex"
+  | "Penthouse"
+  | "Studio"
+  | "";
 
 export type UnitLevel =
   | "ground"
@@ -27,14 +28,18 @@ export interface Price {
   monthlyRent?: number; // for rent
   paymentPlan?: {
     // for primary
-    downPayment?: string;
+    downPayment?: number;
     installments?: {
-      year?: number;
+      year: number;
       frequency: "monthly" | "quarterly" | "yearly";
     };
   };
 }
 
+export interface DateRange {
+  from: Date | null;
+  to: Date | null;
+}
 export interface Areas {
   builtUp: number;
   land?: number;
@@ -58,8 +63,9 @@ export interface Media {
   images: string[];
   floorPlans: string[];
 }
-export type Status = "active" | "sold" | "rented" | "inactive" | "pending";
-export interface PropertyFormData {
+export type Status = "available" | "sold" | "rented" | "reserved" | "pending";
+export interface PropertyData {
+  id?: string;
   listingType: ListingType | "";
   propertyType: PropertyType | "";
   unitLevel?: UnitLevel | "";
@@ -77,5 +83,39 @@ export interface PropertyFormData {
   hasGarden?: boolean;
   hasTerrace?: boolean;
   facilities?: string[];
+  owner: string;
+  deliveryDate?: string;
   features?: string[];
+  rentDetails?: RentDetails;
+  createdAt?: string;
+  updatedAt?: string;
+}
+export interface RentDetails {
+  leaseTerm?: string;
+  deposit?: number;
+  furnished?: boolean;
+  utilitiesIncluded?: boolean;
+}
+export interface PropertyFilters {
+  search?: string;
+  listingType?: string;
+  propertyType?: string;
+  city?: string;
+  compound?: string;
+  developer?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  furnishing?: string;
+  status?: string;
+  facilities?: string[];
+}
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }

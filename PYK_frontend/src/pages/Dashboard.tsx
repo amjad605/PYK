@@ -5,10 +5,11 @@ import { PropertyForm } from "@/components/admin/property-form";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { PropertySection } from "@/components/admin/property-section";
-import type { PropertyData } from "@/components/property/PropertyCard.type";
+import type { PropertyData } from "@/types/property";
 import { useProperty } from "../hooks/useProperty";
 import { Pagination } from "@/utils/Pagination"
-
+import toast from "react-hot-toast";
+import axios from "../lib/axios";
 export function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<PropertyData | null>(null);
@@ -32,7 +33,17 @@ export function Dashboard() {
   const handleDeleteProperty = (id: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this property?");
     if (confirmDelete) {
-      alert(`Deleted property ${id} (API call should happen here)`);
+      axios.delete(`/property/${id}`).then(() => {
+        toast.success("Property deleted successfully");
+        // Optionally, you can refresh the property list here
+        // Reset to first page after deletion
+        setFilters((prev) => ({ ...prev, page: 1 }));
+
+      }
+      ).catch(() => {
+        toast.error("Failed to delete property");
+      }
+      )
     }
   };
 

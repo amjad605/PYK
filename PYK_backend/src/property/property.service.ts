@@ -159,6 +159,12 @@ class PropertyService {
       throw error;
     }
   }
+  async deleteProperty(propertyId: string): Promise<void> {
+    const result = await PropertyModel.findByIdAndDelete(propertyId);
+    if (!result) {
+      throw new AppError("Property not found", 404);
+    }
+  }
 }
 
 export default new PropertyService();

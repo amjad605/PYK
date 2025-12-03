@@ -24,7 +24,7 @@ import { Card, CardContent } from "../ui/card";
 import InfoCard from "./InfoCard";
 import PropertyTabs from "./PropertyTabs";
 
-import type { PropertyData, PropertyType } from "../property/PropertyCard.type";
+import type { PropertyData, PropertyType } from "@/types/property";
 interface PropertyDetailProps {
   mockProperty: PropertyData;
   activeTab: string;
@@ -149,7 +149,7 @@ const PropertyContentOld = ({
                   Premium Amenities
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {mockProperty.facilities.map((amenity) => {
+                  {mockProperty.facilities!.map((amenity) => {
                     const IconComponent = amenityIcons[amenity] || Square;
                     return (
                       <div
@@ -176,7 +176,7 @@ const PropertyContentOld = ({
                 Property Features
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockProperty.features.map((feature, index) => (
+                {mockProperty.features!.map((feature, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
@@ -204,7 +204,7 @@ const PropertyContentOld = ({
                       </span>
                     </div>
                     <div className="text-2xl font-bold text-primary">
-                      {mockProperty.price.paymentPlan?.installments?.years ?? 0}
+                      {mockProperty.price.paymentPlan?.installments?.year ?? 0}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Principal & Interest
