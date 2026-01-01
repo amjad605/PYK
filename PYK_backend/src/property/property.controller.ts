@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PropertyModel } from "./property.model";
+import { IPropertyDoc, PropertyModel } from "./property.model";
 import propertyService from "./property.service";
 import { AsyncWrapper } from "../utils/AsyncWrapper";
 import { ParsedPropertyFilters, PropertyFilterRequest } from "./property.type";
@@ -32,7 +32,7 @@ class PropertyController {
     }
   );
   createProperty = AsyncWrapper(async (req, res, next) => {
-    const property = req.body;
+    const property: Partial<IPropertyDoc> = req.body;
     const result = await propertyService.createProperty(property);
     res.json(result);
   });

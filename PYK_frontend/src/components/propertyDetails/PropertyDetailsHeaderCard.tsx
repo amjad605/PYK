@@ -10,7 +10,6 @@ import type { PropertyData, Status } from '@/types/property';
 import { Badge } from "@/components/ui/badge";
 import PropertyInfoItem from './PropertyInfoItem';
 
-
 interface PropertyDetailsHeaderCardProps {
     property: PropertyData;
     isScrolled: boolean;
@@ -25,25 +24,30 @@ const statusColors: Record<Status, string> = {
 };
 
 const formatArea = (area: number) => {
+    // This check is now mostly redundant due to hasValue, but good for safety
     if (!area || area === 0) return "N/A";
-    console.log('Formatting area:', area);
     return `${area.toLocaleString('en-US', { maximumFractionDigits: 0 })} m²`;
 };
 
-const PropertyDetailsHeaderCard = ({ property,
-    isScrolled
-}: PropertyDetailsHeaderCardProps) => {
+// --- Helper Logic ---
+// Returns true only if value is a number and > 0 (excludes 0, null, undefined)
+const hasValue = (val: number | null | undefined): val is number => {
+    return typeof val === 'number' && val > 0;
+};
+
+const PropertyDetailsHeaderCard = ({ property, isScrolled }: PropertyDetailsHeaderCardProps) => {
 
     return (
-        <div className="sticky top-0 z-20 pt-4 pb-2 ">
+        <div className="sticky top-0 z-20 pt-4 pb-2">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
             >
-                <Card className="overflow-hidden  bg-white/70 backdrop-blur-md">
+                <Card className="overflow-hidden bg-white/70 backdrop-blur-md">
                     <CardContent className="p-6">
                         <div className="flex flex-wrap items-center justify-between gap-4">
+                            {/* Title and Location */}
                             <div className="space-y-2">
                                 <h1 className="text-2xl md:text-3xl font-bold text-balance bg-blue bg-clip-text text-transparent">
                                     {property.title}
@@ -51,59 +55,42 @@ const PropertyDetailsHeaderCard = ({ property,
                                 <div className="flex items-center gap-2 text-slate-600">
                                     <MapPin className="h-4 w-4 text-blue-600" />
                                     <span className="text-sm md:text-base">
-                                        {property.location.compound &&
-                                            `${property.location.compound}, `}
-                                        {property.location.district &&
-                                            `${property.location.district}, `}
+                                        {property.location.compound && `${property.location.compound}, `}
+                                        {property.location.district && `${property.location.district}, `}
                                         {property.location.city}
                                     </span>
                                 </div>
                             </div>
+
+                            {/* Price and Status */}
                             <div className="flex md:flex-col flex-row gap-2 items-end">
                                 <div className="text-center">
                                     {property.price.amount && (
                                         <div>
                                             <p className="text-2xl md:text-3xl text-black font-bold">
-                                                {formatPrice(
-                                                    property.price.amount,
-                                                    property.price.currency
-                                                )}
+                                                {formatPrice(property.price.amount, property.price.currency)}
                                             </p>
-                                            {property.listingType === "rent" &&
-                                                property.price.monthlyRent && (
-                                                    <p className="text-blue-600 text-sm">
-                                                        {formatPrice(
-                                                            property.price.monthlyRent,
-                                                            property.price.currency
-                                                        )}
-                                                        /month
-                                                    </p>
-                                                )}
+                                            {property.listingType === "rent" && property.price.monthlyRent && (
+                                                <p className="text-blue-600 text-sm">
+                                                    {formatPrice(property.price.monthlyRent, property.price.currency)}/month
+                                                </p>
+                                            )}
                                         </div>
                                     )}
-                                    {property.listingType === "rent" &&
-                                        property.price.monthlyRent &&
-                                        !property.price.amount && (
-                                            <p className="text-2xl md:text-3xl font-bold text-blue-700">
-                                                {formatPrice(
-                                                    property.price.monthlyRent,
-                                                    property.price.currency
-                                                )}
-                                                /month
-                                            </p>
-                                        )}
-                                </div>
-                                <Badge
-                                    className={cn(
-                                        "capitalize text-xs px-3 py-1 border",
-                                        statusColors[property.status]
+                                    {property.listingType === "rent" && property.price.monthlyRent && !property.price.amount && (
+                                        <p className="text-2xl md:text-3xl font-bold text-blue-700">
+                                            {formatPrice(property.price.monthlyRent, property.price.currency)}/month
+                                        </p>
                                     )}
-                                >
+                                </div>
+                                <Badge className={cn("capitalize text-xs px-3 py-1 border", statusColors[property.status])}>
                                     <Sparkles className="h-3 w-3 mr-1" />
                                     {property.status}
                                 </Badge>
                             </div>
                         </div>
+
+                        {/* Collapsible Info Grid */}
                         <AnimatePresence>
                             {isScrolled && (
                                 <motion.div
@@ -114,40 +101,44 @@ const PropertyDetailsHeaderCard = ({ property,
                                     className="overflow-hidden"
                                 >
                                     <div className="grid grid-cols-4 gap-4 pt-4 mt-4 border-t border-blue-100">
-                                        {property.bedrooms && (
-                                            <PropertyInfoItem icon={Bed} value={property.bedrooms} label={"Bedrooms"} />
-                                        )}
-                                        {property.bathrooms && (
-                                            <PropertyInfoItem icon={Bath} value={property.bathrooms} label={"Bathrooms"} />
-                                        )}
-                                        {property.areas.total !== 0 && (
-                                            < PropertyInfoItem icon={Home} value={property.areas.total!} label={"Total Area"} />
-                                        )}
-                                        {property.areas.builtUp !== 0 && (
-                                            < PropertyInfoItem icon={Square} value={property.areas.builtUp!} label={"Built-Up Area"} />
-                                        )}
-                                        {(property.areas.land) !== 0 && (
-                                            < PropertyInfoItem icon={LandPlot} value={property.areas.land!} label={"Land Area"} />
+
+                                        {hasValue(property.bedrooms) && (
+                                            <PropertyInfoItem icon={Bed} value={property.bedrooms} label="Bedrooms" />
                                         )}
 
-                                        {property.areas.garden !== 0 && (
+                                        {hasValue(property.bathrooms) && (
+                                            <PropertyInfoItem icon={Bath} value={property.bathrooms} label="Bathrooms" />
+                                        )}
+
+                                        {hasValue(property.areas.total) && (
+                                            <PropertyInfoItem icon={Home} value={property.areas.total} label="Total Area" />
+                                        )}
+
+                                        {hasValue(property.areas.builtUp) && (
+                                            <PropertyInfoItem icon={Square} value={property.areas.builtUp} label="Built-Up Area" />
+                                        )}
+
+                                        {hasValue(property.areas.land) && (
+                                            <PropertyInfoItem icon={LandPlot} value={property.areas.land} label="Land Area" />
+                                        )}
+
+                                        {hasValue(property.areas.garden) && (
                                             <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                                                 <Trees className="h-4 w-4 text-blue-600" />
                                                 <span className="text-sm md:text-md font-bold text-blue-900">
-                                                    {formatArea(property.areas.garden!)}
+                                                    {formatArea(property.areas.garden)}
                                                 </span>
                                                 <span className="text-xs text-slate-600">Garden Area</span>
                                             </div>
                                         )}
-                                        {property.areas.terrace && (
+
+                                        {hasValue(property.areas.terrace) && (
                                             <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-50">
                                                 <Home className="h-4 w-4 text-blue-600" />
                                                 <span className="text-lg font-bold text-blue-900">
                                                     {formatArea(property.areas.terrace)}
                                                 </span>
-                                                <span className="text-xs text-slate-600">
-                                                    Terrace Area
-                                                </span>
+                                                <span className="text-xs text-slate-600">Terrace Area</span>
                                             </div>
                                         )}
                                     </div>
@@ -161,5 +152,4 @@ const PropertyDetailsHeaderCard = ({ property,
     );
 }
 
-export default PropertyDetailsHeaderCard
-
+export default PropertyDetailsHeaderCard;

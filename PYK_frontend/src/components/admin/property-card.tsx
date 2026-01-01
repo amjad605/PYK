@@ -22,11 +22,12 @@ const statusColors: Record<Status, string> = {
 
 };
 
-const getStatusLabel = (status: Status): string => {
+const getStatusLabel = (status: Status | undefined): string => {
+  if (!status) return 'Unknown';
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-const getPropertyTypeIcon = (type: string): string => {
+const getPropertyTypeIcon = (type: string | undefined): string => {
   const typeMap: Record<string, string> = {
     apartment: '🏢',
     villa: '🏡',
@@ -34,14 +35,18 @@ const getPropertyTypeIcon = (type: string): string => {
     land: '🌍',
     commercial: '🏬',
     penthouse: '🏗️',
+    studio: '🏚️',
+    duplex: '🏘️',
+    twin_house: '🏘️',
+
   };
-  return typeMap[type] || '🏠';
+  return typeMap[type || 'apartment'] || '🏠';
 };
 
 const formatPrice = (price: number, currency: string): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency,
+    currency: currency || 'EGP',
     maximumFractionDigits: 0,
   }).format(price);
 };

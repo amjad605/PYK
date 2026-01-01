@@ -40,6 +40,8 @@ export type ParsedPropertyFilters = {
   facilities?: string[];
   search?: string;
   // pagination
+  sortBy?: "price" | "createdAt" | "area";
+  sortOrder?: "asc" | "desc";
 
   page: number;
   limit: number;
@@ -63,7 +65,7 @@ export type PropertyType =
 
 export type UnitLevel =
   | "ground"
-  | "middle"
+  | "typical"
   | "roof"
   | "duplex-lower"
   | "duplex-upper";

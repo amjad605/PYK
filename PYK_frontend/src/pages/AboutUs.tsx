@@ -1,7 +1,7 @@
 "use client";
 
 import Nav from "@/components/common/Nav";
-import { motion } from "framer-motion";
+
 import { useEffect, useRef, type ReactNode } from "react";
 
 const TargetIcon = () => (

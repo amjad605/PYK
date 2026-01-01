@@ -2,7 +2,7 @@ import SideBar from "@/components/admin/SideBar";
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+
 import { Dashboard } from "./Dashboard";
 
 

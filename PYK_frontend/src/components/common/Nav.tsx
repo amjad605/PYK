@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   "Home",
   "Primary",
   "Resale",
-  "Rent",
+  "RentPage",
   "About Us",
   "Contact Us",
 ];
@@ -29,9 +29,8 @@ export default function Nav({
   return (
     <header className="absolute  w-full top-0 z-50">
       <nav
-        className={`w-full transition-colors duration-300 ${
-          isSolid ? "bg-white text-gray-800" : "bg-transparent text-white"
-        }`}
+        className={`w-full transition-colors duration-300 ${isSolid ? "bg-white text-gray-800" : "bg-transparent text-white"
+          }`}
         aria-label="Main navigation"
       >
         <div className="max-w-[92%] mx-auto px-0 sm:px-4 lg:px-8">
@@ -53,13 +52,12 @@ export default function Nav({
                     smooth
                     key={item}
                     to="/#contact"
-                    className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 ${
-                      isSolid
-                        ? "text-gray-800 hover:text-blue-600"
-                        : isBlack
+                    className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 ${isSolid
+                      ? "text-gray-800 hover:text-blue-600"
+                      : isBlack
                         ? "text-black hover:text-blue-200"
                         : "text-white hover:text-blue-200"
-                    } `}
+                      } `}
                   >
                     {item}
                   </HashLink>
@@ -67,18 +65,16 @@ export default function Nav({
                   <Link
                     key={item}
                     to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                    className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 ${
-                      isSolid
-                        ? "text-gray-800 hover:text-blue-600"
-                        : isBlack
+                    className={`text-sm transition-transform duration-200 hover:scale-110 px-2 py-1 ${isSolid
+                      ? "text-gray-800 hover:text-blue-600"
+                      : isBlack
                         ? "text-black hover:text-blue-200"
                         : "text-white hover:text-blue-200"
-                    } ${
-                      (item === "Home" && currentPath === "/") ||
-                      currentPath === `/${item.toLowerCase()}`
+                      } ${(item === "Home" && currentPath === "/") ||
+                        currentPath === `/${item.toLowerCase()}`
                         ? "text-blue font-medium border-b-2 border-blue pb-1"
                         : "text-muted-foreground"
-                    }`}
+                      }`}
                   >
                     {item}
                   </Link>
@@ -92,11 +88,10 @@ export default function Nav({
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-label="Toggle menu"
-                className={`p-2 rounded-md transition-colors ${
-                  isSolid
-                    ? "text-gray-800 hover:bg-gray-100/60"
-                    : "text-white hover:bg-white/10"
-                }`}
+                className={`p-2 rounded-md transition-colors ${isSolid
+                  ? "text-gray-800 hover:bg-gray-100/60"
+                  : "text-white hover:bg-white/10"
+                  }`}
               >
                 {open ? (
                   <svg
@@ -134,16 +129,14 @@ export default function Nav({
 
         {/* Mobile menu */}
         <div
-          className={`md:hidden transition-all duration-300 overflow-hidden ${
-            open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-          }`}
+          className={`md:hidden transition-all duration-300 overflow-hidden ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}
         >
           <ul
-            className={`p-4 space-y-2 ${
-              isSolid
-                ? "bg-white/95 text-gray-800"
-                : "bg-black/40 text-white backdrop-blur-md"
-            } rounded-b-2xl`}
+            className={`p-4 space-y-2 ${isSolid
+              ? "bg-white/95 text-gray-800"
+              : "bg-black/40 text-white backdrop-blur-md"
+              } rounded-b-2xl`}
           >
             {NAV_ITEMS.map((item) =>
               item === "Contact Us" ? (
@@ -152,9 +145,8 @@ export default function Nav({
                     smooth
                     to="/#contact"
                     onClick={() => setOpen(false)}
-                    className={`block px-4 py-2 rounded-md text-sm transition ${
-                      isSolid ? "hover:bg-gray-100" : "hover:bg-white/10"
-                    }`}
+                    className={`block px-4 py-2 rounded-md text-sm transition ${isSolid ? "hover:bg-gray-100" : "hover:bg-white/10"
+                      }`}
                   >
                     {item}
                   </HashLink>
@@ -164,9 +156,8 @@ export default function Nav({
                   <Link
                     to={`/${item.toLowerCase()}`}
                     onClick={() => setOpen(false)}
-                    className={`block px-4 py-2 rounded-md text-sm transition ${
-                      isSolid ? "hover:bg-gray-100" : "hover:bg-white/10"
-                    }`}
+                    className={`block px-4 py-2 rounded-md text-sm transition ${isSolid ? "hover:bg-gray-100" : "hover:bg-white/10"
+                      }`}
                   >
                     {item}
                   </Link>

@@ -6,6 +6,7 @@ import PropertyDetailsHeaderCard from "./PropertyDetailsHeaderCard";
 import PropertyDetailsInfoCard from "./propertyDetailsInfoCard";
 import PropertyDetailsFacilitiesAndFeatureCard from "./PropertyDetailsFacilitiesAndFeatureCard";
 import PropertyDetailsContactCard from "./PropertyDetailsContactCard";
+import PropertyDetailsPlansCard from "./PropertyPlansCards";
 
 interface PropertyDetailProps {
   property: PropertyData;
@@ -28,6 +29,8 @@ export function PropertyDetailContent({ property }: PropertyDetailProps) {
         <div className="py-6 space-y-6">
           {/* Property Details Section */}
           <PropertyDetailsInfoCard property={property} />
+
+          <PropertyDetailsPlansCard property={property} />
           {/* Facilities & Features */}
           <PropertyDetailsFacilitiesAndFeatureCard property={property} />
           {/* Contact Section */}

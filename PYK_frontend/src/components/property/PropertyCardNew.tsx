@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+// Import from Next.js for routing
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,12 +17,11 @@ import {
   Trees,
   Shield,
   Users,
-  Heart,
-  Share2,
 } from "lucide-react";
-import type { PropertyData } from "./PropertyCard.type";
-import { Link, useNavigate } from "react-router-dom";
-import formatPrice from "../../utils/formatPrice";
+
+// Assuming this utility is correctly placed in the utils directory relative to component usage
+import formatPrice from "@/utils/formatPrice";
+import type { PropertyData } from "@/types/property";
 
 interface PropertyCardProps {
   property: PropertyData;
@@ -37,7 +38,8 @@ const facilityIcons = {
 
 export function PropertyCardNew({ property }: PropertyCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const navigate = useNavigate();
+  // Use Next.js router
+  const navigator = useNavigate();
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -61,9 +63,8 @@ export function PropertyCardNew({ property }: PropertyCardProps) {
             src={property.media.images[0] || "/placeholder.svg"}
             loading="lazy"
             alt={property.title}
-            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
             onLoad={() => setImageLoaded(true)}
           />
           {!imageLoaded && (
@@ -120,7 +121,12 @@ export function PropertyCardNew({ property }: PropertyCardProps) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {property.facilities.slice(0, 4).map((facility) => {
+          {/* FIX 1: Use optional chaining (?.) before calling slice. 
+            If facilities is null/undefined, the expression evaluates to undefined,
+            and map() will not be called. We use an empty array (?? []) 
+            to ensure slice() can be safely called, avoiding potential runtime errors.
+          */}
+          {property.facilities?.slice(0, 4).map((facility) => {
             const IconComponent =
               facilityIcons[facility as keyof typeof facilityIcons];
             return IconComponent ? (
@@ -133,19 +139,25 @@ export function PropertyCardNew({ property }: PropertyCardProps) {
               </div>
             ) : null;
           })}
-          {property.facilities.length > 4 && (
-            <div className="flex items-center bg-gray-100 rounded-full px-2 py-1 text-xs text-gray-600">
-              +{property.facilities.length - 4} more
-            </div>
-          )}
+          {/* FIX 2: Use optional chaining (?.) to safely access the length. 
+            If facilities is null/undefined, length is undefined. The condition 
+            will correctly short-circuit and not render the 'more' badge.
+          */}
+          {property.facilities &&
+            property.facilities?.length > 4 && (
+              <div className="flex items-center bg-gray-100 rounded-full px-2 py-1 text-xs text-gray-600">
+                +{property.facilities.length - 4} more
+              </div>
+            )}
         </div>
       </CardContent>
 
       {/* Button always at bottom */}
       <div className="p-6 pt-0">
         <Button
+          // Correctly navigate using the Next.js router
           onClick={() =>
-            navigate(`/property/${property.id}`, { state: { property } })
+            navigator(`/property/${property.id}`)
           }
           className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
         >

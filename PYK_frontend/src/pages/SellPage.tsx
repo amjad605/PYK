@@ -1,66 +1,102 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import Nav from "@/components/common/Nav";
 import FiltersCard from "@/components/property/FiltersCard";
 import PropertyCardListView from "@/components/property/PropertyCardListView";
-import { useProperty } from "@/hooks/useProperty";
-import { useParams } from "react-router-dom";
-import bg2 from "../assets/Modern House at Twilight.png";
 import { Pagination } from "@/utils/Pagination";
+
+import { useProperty } from "@/hooks/useProperty";
 import type { FiltersType } from "@/types/filters";
 
+import bg2 from "../assets/Modern House at Twilight.png";
+
+/* ----------------------------------
+   Constants
+----------------------------------- */
+const INITIAL_FILTERS: FiltersType = {
+  propertyType: "",
+  location: null,
+  priceRange: [0, 0],
+  areaRange: [0, 5000],
+  rooms: null,
+  bathrooms: null,
+  facilities: [],
+  finishing: null,
+  contractDuration: null,
+  dateRange: { from: null, to: null },
+  sortBy: "createdAt",
+  sortOrder: "desc",
+  page: 1,
+  keyword: "",
+  limit: 12,
+};
+const SORT_OPTIONS = [
+  { label: "Newest First", value: "createdAt-desc" },
+  { label: "Price: Low to High", value: "price-asc" },
+  { label: "Price: High to Low", value: "price-desc" },
+  { label: "Largest Area", value: "area-desc" },
+];
 export default function SellPage() {
   const { cat: category } = useParams<{ cat: string }>();
 
-  const [filters, setFilters] = useState<FiltersType>({
-    propertyType: "",
-    location: null,
-    priceRange: [0, 100000000] as [number, number],
-    areaRange: [0, 5000] as [number, number],
-    rooms: null,
-    bathrooms: null,
-    facilities: [],
-    finishing: null,
-    contractDuration: null,
-    dateRange: { from: null, to: null },
-    page: 1,
-    keyword: "",
-    limit: 9,
-  });
+  const [filters, setFilters] = useState<FiltersType>(INITIAL_FILTERS);
 
-  const prevCategory = React.useRef(category);
-
-  // Reset page when category changes
+  /* ----------------------------------
+     Reset pagination on category change
+  ----------------------------------- */
   useEffect(() => {
-    if (prevCategory.current !== category) {
-      prevCategory.current = category;
-      setFilters((prev) => ({ ...prev, page: 1 }));
-    }
+    setFilters((prev) => ({ ...prev, page: 1 }));
   }, [category]);
 
-
-  const handleFilterChange = useCallback((newFilters: Partial<typeof filters>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
+  /* ----------------------------------
+     Handlers
+  ----------------------------------- */
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<FiltersType>) => {
+      setFilters((prev) => ({
+        ...prev,
+        ...newFilters,
+        page: 1,
+      }));
+    },
+    []
+  );
+  const handleSortChange = useCallback((sortValue: string) => {
+    const [sortBy, sortOrder] = sortValue.split("-") as [string, "asc" | "desc"];
+    handleFilterChange({ sortBy, sortOrder });
+  }, [handleFilterChange]);
+  const handlePageChange = useCallback((page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
   }, []);
 
-  const handlePageChange = useCallback((newPage: number) => {
-    setFilters((prev) => ({ ...prev, page: newPage }));
-  }, []);
-
-
+  /* ----------------------------------
+     Build API query params
+  ----------------------------------- */
   const queryParams = useMemo(
     () => ({
       listingType: category,
-      propertyType: filters.propertyType.toLowerCase(),
-      minPrice: filters.priceRange[0],
-      maxPrice: filters.priceRange[1],
+      propertyType: filters.propertyType
+        ? filters.propertyType.toLowerCase()
+        : undefined,
+
+      minPrice: filters.priceRange[0] || 0,
+      maxPrice: filters.priceRange[1] || 0,
+
       minArea: filters.areaRange[0],
       maxArea: filters.areaRange[1],
+
       bedrooms: filters.rooms,
       bathrooms: filters.bathrooms,
-      location: (filters.location ?? "").split(",")[0],
+
+      location: filters.location
+        ? filters.location.split(",")[0]
+        : undefined,
+
       facilities: filters.facilities,
-      furnishing: filters.finishing,
-      contractDuration: filters.contractDuration,
+      finishing: filters.finishing,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
       search: filters.keyword,
       page: filters.page,
       limit: filters.limit,
@@ -68,16 +104,20 @@ export default function SellPage() {
     [category, filters]
   );
 
-  /* -------------------------
-      Fetch data
-     ------------------------- */
-  const { data: properties = [], totalCount = 0, loading } = useProperty(queryParams);
+  /* ----------------------------------
+     Fetch data
+  ----------------------------------- */
+  const {
+    data: properties = [],
+    totalCount = 0,
+    loading,
+  } = useProperty(queryParams);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / filters.limit));
 
-  /* -------------------------
-      Render
-     ------------------------- */
+  /* ----------------------------------
+     Render
+  ----------------------------------- */
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Hero */}
@@ -86,7 +126,8 @@ export default function SellPage() {
         style={{ backgroundImage: `url("${bg2}")` }}
       >
         <Nav />
-        <div className="max-w-7xl mx-auto relative z-10 top-30">
+
+        <div className="relative z-10 max-w-7xl mx-auto top-30">
           <FiltersCard
             listingType={category}
             filters={filters}
@@ -100,9 +141,13 @@ export default function SellPage() {
         properties={properties}
         totalCount={totalCount}
         loading={loading}
+        // New Props
+        currentSort={`${filters.sortBy}-${filters.sortOrder}`}
+        onSortChange={handleSortChange}
+        sortOptions={SORT_OPTIONS}
       />
 
-      {properties.length > 0 && (
+      {totalCount > 0 && (
         <div className="flex justify-center pb-10 bg-stone-50">
           <Pagination
             page={filters.page}

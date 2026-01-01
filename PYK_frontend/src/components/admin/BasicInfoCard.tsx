@@ -17,9 +17,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import type { UseFormReturn } from "react-hook-form";
+import type { PropertyFormValues } from "@/types/property-form-schema";
 
 interface BasicInfoSectionProps {
-  form: any; // 👉 ideally type this properly with your form type (e.g., UseFormReturn<T>)
+  form: UseFormReturn<PropertyFormValues>; // 👉 ideally type this properly with your form type (e.g., UseFormReturn<T>)
 }
 
 export function BasicInfoCard({ form }: BasicInfoSectionProps) {

@@ -9,25 +9,23 @@ import "dotenv/config";
 import appRouter from "./appRouter";
 import { globalErrorHandler } from "./utils/GlobalErrorHandler";
 const app = express();
-const port = 3000;
+const port = 8080;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://192.168.0.2:5173"], // 👈 رابط الـ frontend
-    credentials: true,
+    origin: "*", // or your frontend domain
   })
 );
+
 app.use(appRouter);
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
-});
+
 app.use(globalErrorHandler);
-try{
-mongoose.connect(process.env.DB_URL || "").then(() => {
-  console.log("Connected to database");
-});}
-catch{
-  console.log("failed to connect to database")
+try {
+  mongoose.connect(process.env.DB_URL || "").then(() => {
+    console.log("Connected to database");
+  });
+} catch {
+  console.log("failed to connect to database");
 }
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

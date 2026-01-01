@@ -82,7 +82,7 @@ const PropertySchema = new Schema<IPropertyDoc>(
     },
     unitLevel: {
       type: String,
-      enum: ["ground", "middle", "roof", "duplex-lower", "duplex-upper"],
+      enum: ["ground", "typical", "roof", "duplex-lower", "duplex-upper"],
     },
     title: { type: String, required: true },
     description: String,
@@ -162,14 +162,6 @@ PropertySchema.path("areas.land").validate({
     return true;
   },
   message: "Villas/townhouses must include 'areas.land'.",
-});
-
-PropertySchema.path("unitLevel").validate({
-  validator(this: IPropertyDoc, v: UnitLevel | undefined) {
-    if (buildingTypes.includes(this.propertyType)) return !!v;
-    return v === undefined || v === null;
-  },
-  message: "Building units require 'unitLevel'; villas must not have it.",
 });
 
 PropertySchema.path("areas.garden").validate({

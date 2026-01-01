@@ -30,7 +30,7 @@ export interface Price {
     // for primary
     downPayment?: number;
     installments?: {
-      year: number;
+      years: number;
       frequency: "monthly" | "quarterly" | "yearly";
     };
   };
@@ -62,6 +62,7 @@ export interface DeveloperRef {
 export interface Media {
   images: string[];
   floorPlans: string[];
+  masterPlans: string[];
 }
 export type Status = "available" | "sold" | "rented" | "reserved" | "pending";
 export interface PropertyData {

@@ -44,7 +44,7 @@ export default function RentPage() {
               </Button>
             </Link>
 
-            <Link to="/rent/search">
+            <Link to={`/rent`} >
               <Button
                 size="lg"
                 className="px-8 text-lg bg-white border-blue-600 text-blue-600 hover:bg-blue-50"

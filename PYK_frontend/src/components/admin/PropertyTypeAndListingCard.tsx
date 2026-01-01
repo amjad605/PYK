@@ -15,15 +15,18 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Input } from "../ui/input";
 
 interface PropertyTypeAndListingProps {
   form: any; // 👉 replace `any` with UseFormReturn<PropertyFormData> later
   showBuildingFields: boolean;
+  showGroundFields: boolean;
 }
 
 export function PropertyTypeAndListingCard({
   form,
   showBuildingFields,
+  showGroundFields
 }: PropertyTypeAndListingProps) {
   return (
     <Card>
@@ -120,7 +123,25 @@ export function PropertyTypeAndListingCard({
               </FormItem>
             )}
           />
-        )}
+
+        )} {
+          showGroundFields && (
+            <FormField
+              control={form.control}
+              name="areas.garden"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Garden Area (sqm) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )
+        }
+
       </CardContent>
     </Card>
   );

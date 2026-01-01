@@ -17,8 +17,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
+import type { PropertyFormValues } from "@/types/property-form-schema";
+import type { UseFormReturn } from "react-hook-form";
+
 interface PricingAndAreaCardProps {
-  form: any; // 👉 ideally: UseFormReturn<PropertyFormData>
+  form: UseFormReturn<PropertyFormValues>; // 👉 ideally: UseFormReturn<PropertyFormData>
   showRentFields: boolean;
   showVillaFields: boolean;
 }
@@ -111,33 +114,7 @@ export function PricingAndAreaCard({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="furnishing"
-            render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel>Furnishing</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select furnishing" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="furnished">Furnished</SelectItem>
-                    <SelectItem value="semi-furnished">
-                      Semi-Furnished
-                    </SelectItem>
-                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
         </div>
 
         {/* Finishing */}
@@ -161,10 +138,8 @@ export function PricingAndAreaCard({
                     <SelectItem value="finished">Finished</SelectItem>
                     <SelectItem value="semi-finished">Semi-Finished</SelectItem>
                     <SelectItem value="core-shell">Core & Shell</SelectItem>
-                    <SelectItem value="red-brick">Red Brick</SelectItem>
-                    <SelectItem value="luxury-finished">
-                      Luxury Finished
-                    </SelectItem>
+                    <SelectItem value="furnished">Furnished</SelectItem>
+
                   </SelectContent>
                 </Select>
                 <FormMessage />

@@ -1,66 +1,92 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { PropertyForm } from "@/components/admin/property-form";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { PropertySection } from "@/components/admin/property-section";
 import type { PropertyData } from "@/types/property";
 import { useProperty } from "../hooks/useProperty";
-import { Pagination } from "@/utils/Pagination"
+import { Pagination } from "@/utils/Pagination";
 import toast from "react-hot-toast";
 import axios from "../lib/axios";
+
 export function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<PropertyData | null>(null);
-  const [filters, setFilters] = useState<{ page: number; pageSize: number }>({
+  const [isEditing, setIsEditing] = useState(false);
+  const [filters, setFilters] = useState<{ page: number; limit: number }>({
     page: 1,
-    pageSize: 10,
+    limit: 9,
   });
 
-  const { data: properties, loading: isLoading, totalCount, error } = useProperty(filters);
+  const {
+    data: properties,
+    loading: isLoading,
+    totalCount,
+    error,
+
+  } = useProperty(filters);
+
   const handlePageChange = useCallback((newPage: number) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
   }, []);
 
-  const totalPages = Math.ceil(totalCount / filters.pageSize);
+  const totalPages = Math.ceil(totalCount / filters.limit);
 
   const handleEditProperty = (property: PropertyData) => {
     setEditingProperty(property);
+    setIsEditing(true);
     setIsFormOpen(true);
   };
 
-  const handleDeleteProperty = (id: string) => {
+  const handleDeleteProperty = async (id: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this property?");
     if (confirmDelete) {
-      axios.delete(`/property/${id}`).then(() => {
+      try {
+        await axios.delete(`/property/${id}`);
         toast.success("Property deleted successfully");
-        // Optionally, you can refresh the property list here
         // Reset to first page after deletion
         setFilters((prev) => ({ ...prev, page: 1 }));
+        // Optionally refetch data
 
-      }
-      ).catch(() => {
+      } catch (error) {
         toast.error("Failed to delete property");
       }
-      )
     }
   };
 
   const handleAddProperty = () => {
     setEditingProperty(null);
+    setIsEditing(false);
     setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setEditingProperty(null);
+    setIsEditing(false);
   };
 
-  const goToPage = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setFilters((prev) => ({ ...prev, page }));
+  const handleFormSubmitSuccess = () => {
+    handleCloseForm();
+    // Refetch properties to get updated list
+
+    toast.success(
+      isEditing
+        ? "Property updated successfully"
+        : "Property added successfully"
+    );
   };
+
+  // Optional: Auto-close form on successful edit/add
+  useEffect(() => {
+    if (isFormOpen) {
+      // Any side effects when form opens
+    }
+  }, [isFormOpen]);
+
+
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -76,26 +102,30 @@ export function Dashboard() {
           </Button>
         </div>
 
-
+        {/* Property Form */}
         <PropertyForm
           isOpen={isFormOpen}
           onClose={handleCloseForm}
+          property={editingProperty} // Pass the property to edit
+          isEditing={isEditing} // Tell form if we're editing
+          onSubmitSuccess={handleFormSubmitSuccess} // Handle success callback
         />
 
-
+        {/* Property List Section */}
         <PropertySection
           properties={properties}
           isLoading={isLoading}
-          isEmpty={!properties.length && !isLoading}
+          isEmpty={!properties?.length && !isLoading}
           onEdit={handleEditProperty}
           onDelete={handleDeleteProperty}
         />
 
-        {/* Pagination Controls */}
-
+        {/* Error Display */}
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
-      {properties.length > 0 && (
+
+      {/* Pagination Controls */}
+      {properties?.length > 0 && totalPages > 1 && (
         <div className="flex justify-center pb-10 bg-white">
           <Pagination
             page={filters.page}
@@ -105,6 +135,5 @@ export function Dashboard() {
         </div>
       )}
     </div>
-
   );
 }

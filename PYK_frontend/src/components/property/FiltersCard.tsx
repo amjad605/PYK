@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/drawer";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
+import type { FiltersType } from "@/types/filters";
+
 import { PropertyTypeDropdown } from "./PropertyTypeDropDown";
 import { FacilitiesDropdown } from "./FacilitiesDropdown";
 import { BedsBathsDropdown } from "./BedsBathsDropdown";
@@ -22,16 +24,37 @@ import { LocationDropdown } from "./LocationDropDown";
 import { FurnishingDropdown } from "./FurnishingDropdown";
 import { ContractDurationDropdown } from "./ContractDurationDropdown";
 import { DateRangeFilter } from "./DateRangeFilter";
-import type { FiltersType } from "@/types/filters";
+import { se } from "date-fns/locale";
+import { EGYPT_LOCATIONS } from "@/utils/locations";
+
+/* ----------------------------------
+   Constants
+----------------------------------- */
+const EMPTY_FILTERS: FiltersType = {
+  propertyType: "",
+  location: null,
+  priceRange: [0, 0],
+  areaRange: [0, 5000],
+  rooms: null,
+  bathrooms: null,
+  facilities: [],
+  finishing: null,
+  contractDuration: null,
+  dateRange: { from: null, to: null },
+  sortBy: "createdAt",
+  sortOrder: "desc",
+  page: 1,
+  keyword: "",
+  limit: 12,
+};
 
 
-export type ListingType = "primary" | "resale" | "rent";
 
 interface FiltersCardProps {
-  listingType: string | undefined;
+  listingType?: string;
   filters: FiltersType;
   setFilters: React.Dispatch<React.SetStateAction<FiltersType>>;
-  onApply: (newFilters: Partial<FiltersType>) => void;
+  onApply: (filters: Partial<FiltersType>) => void;
 }
 
 export default function FiltersCard({
@@ -40,271 +63,206 @@ export default function FiltersCard({
   setFilters,
   onApply,
 }: FiltersCardProps) {
-  const [isFirstRender, setIsFirstRender] = useState(true);
   const [showMore, setShowMore] = useState(false);
-  const [keyword, setKeyword] = useState(filters.keyword || "");
-  const [isFirstRenderPrice, setIsFirstRenderPrice] = useState(true);
-  const [isFirstRenderArea, setIsFirstRenderArea] = useState(true);
-  // debounce for keyword
+  const [keyword, setKeyword] = useState(filters.keyword);
+  const [isAreaFirstRendered, setIsAreaFirstRendered] = useState(true);
+  const [isPriceFirstRendered, setIsPriceFirstRendered] = useState(true);
+  const [isDateFirstRendered, setIsDateFirstRendered] = useState(true);
+  /* ----------------------------------
+     Unified updater
+  ----------------------------------- */
+  const updateFilters = useCallback(
+    (updates: Partial<FiltersType>) => {
+      setFilters((prev) => {
+        const next = { ...prev, ...updates, page: 1 };
+        onApply(next);
+        return next;
+      });
+    },
+    [onApply, setFilters]
+  );
+
+  /* ----------------------------------
+     Keyword debounce
+  ----------------------------------- */
   useEffect(() => {
-    const handler = setTimeout(() => {
+    const id = setTimeout(() => {
       if (keyword !== filters.keyword) {
-        const updated = { ...filters, keyword };
-        setFilters(updated);
-        onApply(updated); // ✔ send NEW filters
+        updateFilters({ keyword });
       }
     }, 800);
 
-    return () => clearTimeout(handler);
-  }, [keyword]);
+    return () => clearTimeout(id);
+  }, [keyword, filters.keyword, updateFilters]);
 
+  /* ----------------------------------
+     Clear all
+  ----------------------------------- */
   const clearAll = () => {
-    setFilters({
-      propertyType: "",
-      location: null,
-      priceRange: [0, 100000000],
-      areaRange: [0, 5000],
-      rooms: null,
-      bathrooms: null,
-      facilities: [],
-      finishing: null,
-      contractDuration: null,
-      dateRange: {
-        from: null,
-        to: null,
-      },
-      keyword: "",
-      page: 1,
-      limit: 9,
-    });
-    setIsFirstRenderPrice(true);
-    setIsFirstRenderArea(true);
+    setFilters(EMPTY_FILTERS);
+    onApply(EMPTY_FILTERS);
+    setKeyword("");
+    setIsAreaFirstRendered(true);
+    setIsPriceFirstRendered(true);
+    setIsDateFirstRendered(true);
   };
 
-  const egyptLocations: Record<string, string[]> = {
-    Cairo: [
-      "Nasr City",
-      "Heliopolis",
-      "Maadi",
-      "Fifth Settlement",
-      "New Cairo",
-      "Zamalek",
-    ],
-    Giza: ["Dokki", "Mohandessin", "6th of October", "Sheikh Zayed", "Haram"],
-    Alexandria: ["Smouha", "Stanley", "Gleem", "Miami", "Montaza"],
-  };
-
+  /* ----------------------------------
+     Render
+  ----------------------------------- */
   return (
     <>
       {/* Desktop */}
-      <div className="hidden lg:block ">
-        <Card className="w-full mx-auto shadow-sm border border-gray-100 rounded-2xl  p-6 bg-white">
-          <CardHeader className="p-0 pb-4 flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <SlidersHorizontal className="h-5 w-5 mr-2 text-blue-600" />
+      <div className="hidden lg:block">
+        <Card className="p-6 rounded-2xl border border-gray-100">
+          <CardHeader className="p-0 pb-4 flex justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <SlidersHorizontal className="h-5 w-5 text-blue-600" />
               Refine Your Search
             </CardTitle>
-            <button
-              onClick={clearAll}
-              className="text-sm px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition text-gray-600"
-            >
+            <Button variant="ghost" size="sm" onClick={clearAll}>
               Clear
-            </button>
+            </Button>
           </CardHeader>
 
-          <div className="flex w-full gap-3 items-center">
-            {/* keyword input */}
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-4 w-[90%] bg-gray-50">
+          <div className="flex gap-3 items-center">
+            <div className="flex w-[90%] items-center border rounded-lg px-3 py-4 bg-gray-50">
               <Search className="h-4 w-4 text-gray-500 mr-2" />
               <input
-                type="text"
-                placeholder="Search by  Developer / Compound / Location / Keyword..."
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setFilters({ ...filters, keyword });
-                  }
-                }}
+                placeholder="Search by developer, compound, location..."
                 className="w-full bg-transparent text-sm outline-none"
               />
             </div>
 
             <LocationDropdown
-              location={filters.location}
-              setLocation={(location) => setFilters(prev => ({ ...prev, location, page: 1 }))}
-              egyptLocations={egyptLocations}
-            />
-            <PropertyTypeDropdown
-              propertyType={filters.propertyType}
-              setPropertyType={(propertyType) => {
-                const updated = { ...filters, propertyType, page: 1 };
-                setFilters(updated);
-                onApply(updated);   // ✔ correct
-              }}
-              clearFilter={() => {
-                const updated: FiltersType = { ...filters, propertyType: "" };
-                setFilters(updated);
-                onApply(updated);   // ✔ correct
-              }}
-            />
-            <PriceRangeFilter
-              value={filters.priceRange}
-              onChange={(priceRange) => setFilters(prev => ({ ...prev, priceRange, page: 1 }))}
-              min={0}
-              max={100000000}
-              step={10000}
-              isFirstRender={isFirstRenderPrice}
-              setIsFirstRender={setIsFirstRenderPrice}
+              value={filters.location}
+              onChange={(location) => updateFilters({ location })}
+              locations={EGYPT_LOCATIONS}
             />
 
-            {/* Toggle More Filters */}
+            <PropertyTypeDropdown
+              propertyType={filters.propertyType}
+              setPropertyType={(propertyType) =>
+                updateFilters({ propertyType })
+              }
+              clearFilter={() => updateFilters({ propertyType: "" })}
+            />
+
+            <PriceRangeFilter
+              value={filters.priceRange}
+              onChange={(priceRange) => updateFilters({ priceRange })}
+              min={0}
+              max={100_000_000}
+              step={10_000}
+              isFirstRender={isPriceFirstRendered}
+              setIsFirstRender={setIsPriceFirstRendered}
+            />
+
             <Button
               variant="outline"
-              onClick={() => setShowMore(!showMore)}
-              className="rounded-lg flex items-center gap-2 text-sm"
+              onClick={() => setShowMore((s) => !s)}
+              className="flex items-center gap-2"
             >
-              {showMore ? (
-                <>
-                  <X className="h-4 w-4" /> Hide Filters
-                </>
-              ) : (
-                <>
-                  <SlidersHorizontal className="h-4 w-4" /> More Filters
-                </>
-              )}
+              {showMore ? <X className="h-4 w-4" /> : <SlidersHorizontal className="h-4 w-4" />}
+              {showMore ? "Hide" : "More"}
             </Button>
           </div>
 
           {showMore && (
-            <div className="mt-5 grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 mt-5">
               <BedsBathsDropdown
                 rooms={filters.rooms}
                 bathrooms={filters.bathrooms}
-                setRooms={(rooms) => setFilters(prev => ({ ...prev, rooms, page: 1 }))}
+                setRooms={(rooms) => updateFilters({ rooms })}
                 setBathrooms={(bathrooms) =>
-                  setFilters({ ...filters, bathrooms })
+                  updateFilters({ bathrooms })
                 }
               />
+
               <AreaRangeFilter
                 value={filters.areaRange}
-                onChange={(areaRange) => setFilters(prev => ({ ...prev, areaRange, page: 1 }))}
+                onChange={(areaRange) => updateFilters({ areaRange })}
                 min={0}
                 max={5000}
                 step={100}
-                isFirstRender={isFirstRenderArea}
-                setIsFirstRender={setIsFirstRenderArea}
-              />
+                isFirstRender={isAreaFirstRendered} setIsFirstRender={setIsAreaFirstRendered} />
+
               <FurnishingDropdown
                 value={filters.finishing}
                 setValue={(finishing) =>
-                  setFilters(prev => ({ ...prev, finishing, page: 1 }))
+                  updateFilters({ finishing })
                 }
               />
+
               <FacilitiesDropdown
                 facilities={filters.facilities}
                 setFacilities={(facilities) =>
-                  setFilters(prev => ({ ...prev, facilities, page: 1 }))
+                  updateFilters({ facilities })
                 }
               />
 
               {listingType === "rent" && (
-                <>
-                  <DateRangeFilter
-                    filters={filters.dateRange}
-                    setFilters={(dateRange) =>
-                      setFilters({ ...filters, dateRange })
-                    }
-                    isFirstRender={isFirstRender}
-                    setIsFirstRender={setIsFirstRender}
-                  />
-                </>
+                <DateRangeFilter
+                  filters={filters.dateRange}
+                  isFirstRender={isDateFirstRendered}
+                  setIsFirstRender={setIsDateFirstRendered}
+                  setFilters={(dateRange) =>
+                    updateFilters({ dateRange })
+
+                  }
+                />
               )}
             </div>
           )}
         </Card>
       </div>
 
-      {/* Mobile (unchanged) */}
-      <div className="lg:hidden w-full px-4">
+      {/* Mobile */}
+      <div className="lg:hidden px-4">
         <Drawer>
-          <div className="flex gap-2 ">
-            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-4 w-[90%] bg-gray-50">
-              <Search className="h-4 w-4 text-gray-500 mr-2" />
-              <input
-                type="text"
-                placeholder="Search by Developer/Compound/Location/Keyword..."
-                value={keyword}
-                onChange={(e) => {
-                  setKeyword(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setFilters({ ...filters, keyword });
-                  }
-                }}
-                className="w-full bg-transparent text-[10px] outline-none"
-              />
-            </div>
-            <DrawerTrigger asChild>
-              <Button className="flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg mx-auto h-14 w-14">
-                <SlidersHorizontal className="h6 w-6 " />
-              </Button>
-            </DrawerTrigger>
-          </div>
-          <DrawerContent className="flex flex-col h-[45vh] rounded-t-2xl p-4">
+          <DrawerTrigger asChild>
+            <Button className="w-full h-14 flex gap-2">
+              <SlidersHorizontal className="w-5 h-5" />
+              Filters
+            </Button>
+          </DrawerTrigger>
+
+          <DrawerContent className="h-[45vh] p-4 rounded-t-2xl">
             <DrawerHeader>
-              <DrawerTitle className="text-lg font-semibold">
-                Refine Your Search
-              </DrawerTitle>
+              <DrawerTitle>Refine Your Search</DrawerTitle>
             </DrawerHeader>
 
-            <div className="flex-1 overflow-y-auto grid grid-cols-1 gap-4 py-4">
+            <div className="grid gap-4 overflow-y-auto">
               <LocationDropdown
-                location={filters.location}
-                setLocation={(location) => setFilters({ ...filters, location })}
-                egyptLocations={egyptLocations}
+                value={filters.location}
+                onChange={(location) => updateFilters({ location })}
+                locations={EGYPT_LOCATIONS}
               />
+
               <PropertyTypeDropdown
                 propertyType={filters.propertyType}
                 setPropertyType={(propertyType) =>
-                  setFilters({ ...filters, propertyType })
+                  updateFilters({ propertyType })
                 }
-                clearFilter={() => setFilters({ ...filters, propertyType: "" })}
+                clearFilter={() => updateFilters({ propertyType: "" })}
               />
+
               <BedsBathsDropdown
                 rooms={filters.rooms}
                 bathrooms={filters.bathrooms}
-                setRooms={(rooms) => setFilters({ ...filters, rooms })}
+                setRooms={(rooms) => updateFilters({ rooms })}
                 setBathrooms={(bathrooms) =>
-                  setFilters({ ...filters, bathrooms })
+                  updateFilters({ bathrooms })
                 }
               />
+
               <FacilitiesDropdown
                 facilities={filters.facilities}
                 setFacilities={(facilities) =>
-                  setFilters({ ...filters, facilities })
+                  updateFilters({ facilities })
                 }
-              />
-              <AreaRangeFilter
-                value={filters.areaRange}
-                onChange={(areaRange) => setFilters({ ...filters, areaRange })}
-                min={1000}
-                max={5000}
-                step={100}
-                isFirstRender={isFirstRenderArea}
-                setIsFirstRender={setIsFirstRenderArea}
-              />
-              <PriceRangeFilter
-                value={filters.priceRange}
-                onChange={(priceRange) =>
-                  setFilters({ ...filters, priceRange })
-                }
-                min={1000}
-                max={5000}
-                step={100}
-                isFirstRender={isFirstRenderPrice}
-                setIsFirstRender={setIsFirstRenderPrice}
               />
 
               {listingType === "rent" && (
@@ -312,28 +270,26 @@ export default function FiltersCard({
                   <FurnishingDropdown
                     value={filters.finishing}
                     setValue={(finishing) =>
-                      setFilters({ ...filters, finishing })
+                      updateFilters({ finishing })
                     }
                   />
                   <ContractDurationDropdown
                     value={filters.contractDuration}
                     setValue={(contractDuration) =>
-                      setFilters({ ...filters, contractDuration })
+                      updateFilters({ contractDuration })
                     }
                   />
                 </>
               )}
             </div>
 
-            <div className="mt-4 flex flex-col sm:flex-row gap-3">
-              <Button
-                variant="ghost"
-                onClick={clearAll}
-                className="w-full rounded-lg text-gray-600 hover:text-gray-900 bg-gray-100 py-3"
-              >
+            <div className="mt-4 flex gap-3">
+              <Button variant="outline" onClick={clearAll} className="w-full">
                 Clear All
               </Button>
-              <DrawerClose asChild></DrawerClose>
+              <DrawerClose asChild>
+                <Button className="w-full">Apply</Button>
+              </DrawerClose>
             </div>
           </DrawerContent>
         </Drawer>

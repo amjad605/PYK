@@ -2,6 +2,7 @@ import { IPropertyDoc } from "./property.model";
 import { ParsedPropertyFilters } from "./property.type";
 import { PropertyModel } from "./property.model";
 import { AppError } from "../utils/AppError";
+import { FilterQuery, SortOrder } from "mongoose";
 
 // 🔹 Helper function to normalize search terms
 function normalizeSearchTerm(term: string): string[] {
@@ -40,29 +41,23 @@ function normalizeSearchTerm(term: string): string[] {
 
 class PropertyService {
   async getFilteredProperties(filters: ParsedPropertyFilters) {
-    const query: any = {};
+    // 1. Initialize Query with strict typing
+    const query: FilterQuery<typeof PropertyModel> = {};
 
-    // 📌 Price filter
+    // 📌 Price filter logic (Stayed the same, but typed)
     if (filters.minPrice || filters.maxPrice) {
-      if (filters.listingType === "rent") {
-        query["price.monthlyRent"] = {};
-        if (filters.minPrice)
-          query["price.monthlyRent"].$gte = filters.minPrice;
-        if (filters.maxPrice)
-          query["price.monthlyRent"].$lte = filters.maxPrice;
-      } else {
-        query["price.amount"] = {};
-        if (filters.minPrice) query["price.amount"].$gte = filters.minPrice;
-        if (filters.maxPrice) query["price.amount"].$lte = filters.maxPrice;
-      }
+      const priceField =
+        filters.listingType === "rent" ? "price.monthlyRent" : "price.amount";
+      query[priceField] = {};
+      if (filters.minPrice) query[priceField].$gte = filters.minPrice;
+      if (filters.maxPrice) query[priceField].$lte = filters.maxPrice;
     }
 
-    // 📌 Area filter
+    // 📌 Range & Equality Filters
     if (filters.minArea || filters.maxArea) {
-      const field = "areas.builtUp";
-      query[field] = {};
-      if (filters.minArea) query[field].$gte = filters.minArea;
-      if (filters.maxArea) query[field].$lte = filters.maxArea;
+      query["areas.builtUp"] = {};
+      if (filters.minArea) query["areas.builtUp"].$gte = filters.minArea;
+      if (filters.maxArea) query["areas.builtUp"].$lte = filters.maxArea;
     }
 
     if (filters.bedrooms) query.bedrooms = filters.bedrooms;
@@ -72,6 +67,7 @@ class PropertyService {
     if (filters.propertyType) query.propertyType = filters.propertyType;
     if (filters.location) query["location.district"] = filters.location;
     if (filters.compound) query.compound = filters.compound;
+
     if (filters.facilities) {
       const facilitiesArray = Array.isArray(filters.facilities)
         ? filters.facilities
@@ -79,29 +75,61 @@ class PropertyService {
       query.facilities = { $in: facilitiesArray };
     }
 
+    // 📌 2. Dynamic Sorting Logic
+    const sortOptions: { [key: string]: SortOrder } = {};
+
+    if (filters.sortBy) {
+      const order: SortOrder = filters.sortOrder === "asc" ? 1 : -1;
+
+      switch (filters.sortBy) {
+        case "price":
+          const priceField =
+            filters.listingType === "rent"
+              ? "price.monthlyRent"
+              : "price.amount";
+          sortOptions[priceField] = order;
+          break;
+        case "area":
+          sortOptions["areas.builtUp"] = order;
+          break;
+        case "createdAt":
+        default:
+          sortOptions["createdAt"] = order;
+      }
+    } else if (!filters.search) {
+      // Default sort for browsing if no search term is provided
+      sortOptions["createdAt"] = -1;
+    }
+
+    // 📌 3. Pagination Setup
+    const page = Math.max(1, filters.page || 1);
+    const limit = Math.max(1, Math.min(100, filters.limit || 20)); // Cap limit at 100
+    const skip = (page - 1) * limit;
+
     let properties = [];
     let total = 0;
 
-    const page = filters.page || 1;
-    const limit = filters.limit || 20;
-    const skip = (page - 1) * limit;
-
-    // 📌 Advanced Search
+    // 📌 4. Execution Logic (Search vs. Filter)
     if (filters.search) {
       const terms = normalizeSearchTerm(filters.search);
-
-      // Text search first
       const textQuery = { ...query, $text: { $search: terms.join(" ") } };
+
+      // If user provided an explicit sort, use it. Otherwise, use textScore relevance.
+      const textSort =
+        Object.keys(sortOptions).length > 0
+          ? sortOptions
+          : { score: { $meta: "textScore" } };
 
       [properties, total] = await Promise.all([
         PropertyModel.find(textQuery, { score: { $meta: "textScore" } })
+          .sort(textSort as any)
           .skip(skip)
           .limit(limit)
-          .sort({ score: { $meta: "textScore" } }),
+          .lean(), // lean() for better performance on read-only
         PropertyModel.countDocuments(textQuery),
       ]);
 
-      // Fallback → regex search
+      // Fallback to Regex if Text Search yields nothing
       if (total === 0) {
         const regexQuery = {
           ...query,
@@ -117,13 +145,22 @@ class PropertyService {
         };
 
         [properties, total] = await Promise.all([
-          PropertyModel.find(regexQuery).skip(skip).limit(limit),
+          PropertyModel.find(regexQuery)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit)
+            .lean(),
           PropertyModel.countDocuments(regexQuery),
         ]);
       }
     } else {
+      // Standard Filtered Query
       [properties, total] = await Promise.all([
-        PropertyModel.find(query).skip(skip).limit(limit),
+        PropertyModel.find(query)
+          .sort(sortOptions)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
         PropertyModel.countDocuments(query),
       ]);
     }
@@ -145,9 +182,20 @@ class PropertyService {
         throw new AppError("Missing required property fields", 400);
       }
 
-      const exists = await PropertyModel.exists({ title: property.title });
-      if (exists) {
-        throw new AppError("Property already exists", 400);
+      // Process location if it exists
+      if (property.location) {
+        if (property.propertyLocation?.city) {
+          property.propertyLocation.city = property.propertyLocation.city
+            .toLowerCase()
+            .replace(/\s+/g, "");
+        }
+
+        if (property.propertyLocation?.district) {
+          property.propertyLocation.district =
+            property.propertyLocation.district
+              .toLowerCase()
+              .replace(/\s+/g, "");
+        }
       }
 
       const createdProperty = await PropertyModel.create(property);

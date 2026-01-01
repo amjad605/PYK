@@ -204,7 +204,7 @@ const PropertyContentOld = ({
                       </span>
                     </div>
                     <div className="text-2xl font-bold text-primary">
-                      {mockProperty.price.paymentPlan?.installments?.year ?? 0}
+                      {mockProperty.price.paymentPlan?.installments?.years ?? 0}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Principal & Interest

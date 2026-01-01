@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import logo from "../assets/PYK INVEST Brand identity-23.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ const LoginPage = () => {
     const [errors, setErrors] = useState({ email: "", password: "", general: "" });
     const navigate = useNavigate();
     const validateForm = () => {
-        let formErrors = { email: "", password: "", general: "" };
+        const formErrors = { email: "", password: "", general: "" };
         let isValid = true;
 
         if (!email) {
@@ -46,9 +46,9 @@ const LoginPage = () => {
             const response = await axiosInstance.post(
                 "auth/login",
                 { email, password },
-                { withCredentials: true }
+                { withCredentials: false }
             );
-
+            console.log(response);
             const data = response.data as { token: string; user: any };
             setLoading(false);
 

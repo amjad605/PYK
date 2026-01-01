@@ -12,6 +12,8 @@ export type FiltersType = {
   contractDuration: string | null;
   dateRange: DateRange;
   page: number;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
   keyword?: string;
   limit: number;
 };

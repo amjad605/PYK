@@ -1,13 +1,24 @@
 import type { Price } from "@/types/property";
 
 export default function calculateInstallment(price: Price): number | null {
-  if (!price.amount || !price.paymentPlan || !price.paymentPlan.installments)
+  if (
+    !price?.amount ||
+    !price?.paymentPlan ||
+    !price?.paymentPlan?.installments
+  )
     return null;
 
-  const remainingAmount: number =
-    price.amount - (price.paymentPlan.downPayment ?? 0);
-  const { year, frequency } = price.paymentPlan.installments;
+  const amount = Number(price.amount);
+  const downPayment = Number(price.paymentPlan.downPayment) || 0;
+  const year = Number(price.paymentPlan.installments.years);
 
+  // Validate numbers
+  if (isNaN(amount) || isNaN(year) || year <= 0) {
+    return null;
+  }
+
+  const remainingAmount: number = amount - downPayment;
+  const { frequency } = price.paymentPlan.installments;
   let totalInstallments = 0;
 
   switch (frequency) {
@@ -20,7 +31,12 @@ export default function calculateInstallment(price: Price): number | null {
     case "yearly":
       totalInstallments = year;
       break;
+    default:
+      return null;
   }
 
-  return remainingAmount / totalInstallments;
+  if (totalInstallments === 0) return null;
+
+  const result = remainingAmount / totalInstallments;
+  return isNaN(result) || !isFinite(result) ? null : result;
 }

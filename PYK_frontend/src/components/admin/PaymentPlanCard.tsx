@@ -16,8 +16,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import type { PropertyFormValues } from "@/types/property-form-schema";
 import type { Control } from "react-hook-form";
-import type { PropertyFormValues } from "./property-form";
+
 
 interface PaymentPlanCardProps {
   control: Control<PropertyFormValues>;
@@ -42,6 +43,7 @@ export function PaymentPlanCard({ control }: PaymentPlanCardProps) {
                   type="number"
                   placeholder="Enter down payment"
                   {...field}
+                  value={field.value ?? ''}
                 />
               </FormControl>
               <FormMessage />
@@ -61,6 +63,7 @@ export function PaymentPlanCard({ control }: PaymentPlanCardProps) {
                     type="number"
                     placeholder="Number of years"
                     {...field}
+                    value={field.value ?? ''}
                   />
                 </FormControl>
                 <FormMessage />
@@ -76,7 +79,8 @@ export function PaymentPlanCard({ control }: PaymentPlanCardProps) {
                 <FormLabel>Frequency *</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value ?? undefined}
+
                 >
                   <FormControl>
                     <SelectTrigger>

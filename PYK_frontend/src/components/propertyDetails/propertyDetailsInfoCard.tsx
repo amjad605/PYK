@@ -100,7 +100,7 @@ const PropertyDetailsInfoCard: React.FC<PropertyDetailsInfoCardProps> = ({
                                     </td>
                                     <td className="px-4 py-3 text-sm font-semibold text-slate-900 flex items-center gap-2">
                                         <CalendarIcon className="h-4 w-4" />
-                                        {new Date(property.deliveryDate).getFullYear()}
+                                        {new Date(property.deliveryDate).getFullYear() === new Date().getFullYear() ? "ready to move" : new Date(property.deliveryDate).getFullYear()}
                                     </td>
                                 </tr>
                             )}

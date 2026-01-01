@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, Plus, X, Images } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Save } from "lucide-react";
+import { useForm, } from "react-hook-form"; // Added FieldValues for safer useForm typing
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import axios from "axios";
+
 import { BasicInfoCard } from "./BasicInfoCard";
 import { PropertyTypeAndListingCard } from "./PropertyTypeAndListingCard";
 import { PricingAndAreaCard } from "./PricingAndAreaCard";
@@ -31,10 +31,14 @@ import LocationInfoCard from "./LocationInfoCard";
 import FacilitiesCard from "./FacilitiesCard";
 import DeveloperOwnerInfoCard from "./DeveloperOwnerInfoCard";
 import { PaymentPlanCard } from "./PaymentPlanCard";
-import { propertyFormSchema, type PropertyFormValues } from "@/types/property-form-schema";
-
-
-
+import {
+  propertyFormSchema,
+  type PropertyFormValues,
+} from "@/types/property-form-schema";
+import type { PropertyData } from "@/types/property";
+import toast from "react-hot-toast";
+import axios from "@/lib/axios";
+// Lazy load uploaders
 const ImageUploader = lazy(() =>
   import("@/components/admin/image-uploader").then((m) => ({
     default: m.ImageUploader,
@@ -48,168 +52,217 @@ const FloorPlanUploader = lazy(() =>
 
 interface PropertyFormProps {
   onClose: () => void;
-  isOpen: boolean
+  isOpen: boolean;
+  property?: PropertyData | null;
+  isEditing?: boolean;
+  onSubmitSuccess?: () => void;
 }
 
-export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [propertyType, setPropertyType] = useState("");
+// Define the default values structure for clarity and reuse
+const defaultFormValues: PropertyFormValues = {
+  title: "",
+  status: "available",
+  description: "",
+  listingType: "primary",
+  propertyType: "" as any,
+  unitLevel: undefined,
+  price: {
+    currency: "EGP",
+    amount: undefined,
+    monthlyRent: undefined,
+    paymentPlan: undefined,
+  },
 
-  // Initialize the form with default values that match backend schema
+};
+
+export function PropertyForm({
+  onClose,
+  isOpen,
+  property,
+  isEditing = false,
+  onSubmitSuccess,
+}: PropertyFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [existingFloorPlans, setExistingFloorPlans] = useState<string[]>([]);
+
+  // Safely map existing property data to form values for editing
+  const initialFormValues: PropertyFormValues = useMemo(() => {
+    if (property && isEditing) {
+      return {
+        title: property.title || "",
+        status: property.status,
+        description: property.description || "",
+        listingType: property.listingType || "primary",
+        propertyType: property.propertyType as any,
+        unitLevel: property.unitLevel as any,
+        price: {
+          currency: property.price?.currency || "EGP",
+          amount: property.price?.amount || undefined,
+          monthlyRent: property.price?.monthlyRent || undefined,
+          paymentPlan: property.price?.paymentPlan
+            ? {
+              downPayment: property.price.paymentPlan.downPayment || 0,
+              installments: {
+                years: property.price.paymentPlan.installments?.years || 0,
+                frequency:
+                  property.price.paymentPlan.installments?.frequency as any ||
+                  "monthly",
+              },
+            }
+            : undefined,
+        },
+        areas: {
+          builtUp: property.areas?.builtUp || 0,
+          land: property.areas?.land || undefined,
+          total: property.areas?.total || undefined,
+          garden: property.areas?.garden || undefined,
+          terrace: property.areas?.terrace || undefined,
+          roof: property.areas?.roof || undefined,
+        },
+
+      };
+    }
+    return defaultFormValues;
+  }, [property, isEditing]);
+
   const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertyFormSchema) as any,
-    defaultValues: {
-      listingType: "primary",
-      propertyType: "",
-      location: {
-        city: "",
-        district: "",
-        compound: "",
-      },
-      price: {
-        currency: "EGP",
-      },
-      facilities: [],
-    },
+    resolver: zodResolver(propertyFormSchema) as any, // Retain 'as any' for complex object structures if necessary, though direct type is usually better.
+    defaultValues: initialFormValues as unknown as PropertyFormValues, // Use FieldValues for better type inference with react-hook-form
   });
 
-  // Watch propertyType to show/hide conditional fields
-  const watchedPropertyType = form.watch("propertyType");
+  // Watch fields for conditional rendering
+  const propertyType = form.watch("propertyType");
   const watchedListingType = form.watch("listingType");
 
+  // Reset form and set existing media when dialog opens/property changes
   useEffect(() => {
-    setPropertyType(watchedPropertyType || "");
-  }, [watchedPropertyType]);
+    if (isOpen) {
+      if (property && isEditing) {
+        // Set existing media URLs
+        setExistingImages(property.media?.images || []);
+        setExistingFloorPlans(property.media?.floorPlans || []);
 
-  // Handle form submission - FIXED to match backend schema
+        // Reset form with mapped initial values
+        form.reset(initialFormValues);
+      } else {
+        // Reset to defaults for new property
+        form.reset(defaultFormValues);
+        setExistingImages([]);
+        setExistingFloorPlans([]);
+      }
+    }
+  }, [property, isEditing, form, isOpen, initialFormValues]); // Added initialFormValues to dependencies
+
   const onSubmit = async (data: PropertyFormValues) => {
     setIsSubmitting(true);
     try {
-      // 1. First, let's test with a simple JSON request (without files)
-      const propertyData = {
-        title: data.title,
-        status: data.status,
-        description: data.description || "",
-        listingType: data.listingType,
-        propertyType: data.propertyType,
-        unitLevel: data.unitLevel,
-        price: {
-          currency: data.price.currency,
-          amount: data.price.amount,
-          paymentPlan: {
-            downPayment: data.price.paymentPlan?.downPayment || undefined,
-            installments: {
-              years: data.price.paymentPlan?.installments?.years || undefined,
-              frequency:
-                data.price.paymentPlan?.installments?.frequency || undefined,
-            },
+      const propertyId = property?.id || property?.id;
+
+      // Prepare clean data - remove undefined values (JSON.parse(JSON.stringify) is a common way to deep-clean but inefficient. Better to manually remove properties or rely on the backend.)
+      // For simplicity and matching original logic, we'll keep the shallow clean
+      const cleanData = JSON.parse(JSON.stringify(data));
+
+      if (isEditing && propertyId) {
+        // EDIT MODE: Update property details (including the *current* list of existing media URLs)
+        const updateData = {
+          ...cleanData,
+          media: {
+            images: existingImages, // Send current state of existing images
+            floorPlans: existingFloorPlans, // Send current state of existing floor plans
           },
-          monthlyRent: data.price.monthlyRent || undefined,
-        },
-        areas: {
-          builtUp: data.areas.builtUp,
-          land: data.areas.land || undefined,
-          total: data.areas.total || undefined,
-          garden: data.areas.garden || undefined,
-          terrace: data.areas.terrace || undefined,
-          roof: data.areas.roof || undefined,
-        },
-        bedrooms: data.bedrooms || undefined,
-        bathrooms: data.bathrooms || undefined,
-        facilities: data.facilities || [],
-        location: {
-          city: data.location.city,
-          district: data.location.district || "",
-          compound: data.location.compound || "",
-        },
-        compoundId: data.compoundId || null,
-        developer: data.developer?.name
-          ? {
-            id: data.developer.id || "64f2b1c4c3d2f4e6a8b1c3f2",
-            name: data.developer.name,
-          }
-          : undefined,
-        deliveryDate: data.deliveryDate
-          ? new Date(data.deliveryDate).toISOString()
-          : undefined,
-        owner: data.owner?.name
-          ? {
-            name: data.owner.name,
-            contact: {
-              phone: data.owner.contact?.phone || "",
-              email: data.owner.contact?.email || "",
-            },
-          }
-          : undefined,
-        furnishing: data.furnishing || undefined,
-        finishing: data.finishing || undefined,
-        rentDetails: data.rentDetails
-          ? {
-            leaseTerm: data.rentDetails.leaseTerm || "",
-            deposit: data.rentDetails.deposit || undefined,
-            furnished: data.rentDetails.furnished || false,
-            utilitiesIncluded: data.rentDetails.utilitiesIncluded || false,
-          }
-          : undefined,
-      };
+        };
 
-      // Remove undefined values to clean up the object
-      const cleanPropertyData = JSON.parse(JSON.stringify(data));
+        await axios.put(`/property/${propertyId}`, updateData);
+        toast.success("Property details updated successfully!");
 
-      console.log("📤 Submitting property data:", cleanPropertyData);
+        // Upload new files if any
+        const hasNewImages = data.media?.images && data.media.images.length > 0;
+        const hasNewFloorPlans =
+          data.media?.floorPlans && data.media.floorPlans.length > 0;
 
-      // 2. Try sending as pure JSON first
-      const response = await axios.post(
-        "http://localhost:3000/property",
-        cleanPropertyData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          timeout: 10000, // 10 second timeout
+        if (hasNewImages || hasNewFloorPlans) {
+          const formData = new FormData();
+
+          if (data.media?.images) {
+            data.media.images.forEach((file: File) => {
+              formData.append("images", file);
+            });
+          }
+
+          if (data.media?.floorPlans) {
+            data.media.floorPlans.forEach((file: File) => {
+              formData.append("floorPlans", file);
+            });
+          }
+
+          await axios.patch(`/property/${propertyId}/media`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          toast.success("New media uploaded successfully!");
         }
-      );
+      } else {
+        // ADD MODE: Create property details (initially with empty media arrays)
+        const createData = {
+          ...cleanData,
+          media: {
+            images: [],
+            floorPlans: [],
+          },
+        };
 
-      console.log("✅ Created property:", response.data);
+        // const response = 
+        await axios.post("/property", createData);
+        // const newPropertyId = response.data?.id as string | undefined || "";
 
-      // 3. If JSON works, then handle file uploads separately if needed
-      if (data.media.images && data.media.images.length > 0) {
-        console.log("📸 Handling image uploads separately...");
-        // You can implement file upload separately here
+
+        // // Upload files for new property (if any)
+        // const hasImages = data.media?.images && data.media.images.length > 0;
+        // const hasFloorPlans =
+        //   data.media?.floorPlans && data.media.floorPlans.length > 0;
+
+        // if (hasImages || hasFloorPlans) {
+        //   const formData = new FormData();
+
+        //   if (hasImages) {
+        //     data.media?.images?.forEach((file: File) => {
+        //       formData.append("images", file);
+        //     });
+        //   }
+
+        //   if (hasFloorPlans) {
+        //     data.media?.floorPlans?.forEach((file: File) => {
+        //       formData.append("floorPlans", file);
+        //     });
+        //   }
+
+        //   await axios.patch(`/property/${newPropertyId}/media`, formData, {
+        //     headers: { "Content-Type": "multipart/form-data" },
+        //   });
+        //   toast.success("Media uploaded successfully for the new property!");
+        // }
       }
 
-      alert("Property created successfully!");
+      onSubmitSuccess?.();
       onClose();
     } catch (error: any) {
-      console.error("❌ Error creating property:", error);
+      console.error("❌ Error submitting property form:", error);
 
-      // Detailed error logging
       if (error.response) {
-        // Server responded with error status
-        console.error("📡 Server response error:", error.response.status);
-        console.error("📄 Server error data:", error.response.data);
-        console.error("🔧 Server error headers:", error.response.headers);
-
-        alert(
-          `Server error (${error.response.status}): ${error.response.data?.message || "Unknown error"
-          }`
-        );
+        const errorMessage =
+          error.response.data?.message || error.response.statusText;
+        toast.error(`Server Error (${error.response.status}): ${errorMessage}`);
       } else if (error.request) {
-        // Request was made but no response received
-        console.error("📡 No response received:", error.request);
-        alert("No response from server. Check if backend is running.");
+        toast.error("No response from server. Please check your connection.");
       } else {
-        // Something else happened
-        console.error("❌ Error message:", error.message);
-        alert(`Error: ${error.message}`);
+        toast.error(`Client Error: ${error.message}`);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-  // Add a facility to the list
 
-  // Check which fields should be shown based on property type
+  // Logic for showing fields
   const showVillaFields = ["villa", "townhouse", "twin_house"].includes(
     propertyType
   );
@@ -221,46 +274,71 @@ export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
   ].includes(propertyType);
   const showRentFields = watchedListingType === "rent";
 
+  const handleImageRemoval = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleFloorPlanRemoval = (index: number) => {
+    setExistingFloorPlans((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!max-w-4xl max-h-[90vh] overflow-y-auto  mx-auto p-10  ">
+      <DialogContent className="!max-w-4xl max-h-[90vh] overflow-y-auto mx-auto p-6 md:p-10">
         <DialogHeader>
-          <DialogTitle>Add New Property</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Property" : "Add New Property"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Information */}
+            {/* --- Basic Information --- */}
             <BasicInfoCard form={form} />
 
-            {/* Property Type & Listing */}
+            <hr className="my-6" />
+
+            {/* --- Property Type & Listing --- */}
             <PropertyTypeAndListingCard
               form={form}
               showBuildingFields={showBuildingFields}
+              showGroundFields={form.watch("unitLevel") === "ground"}
             />
-            {/* Pricing & Area */}
+
+            <hr className="my-6" />
+
+            {/* --- Pricing & Area --- */}
             <PricingAndAreaCard
               form={form}
               showRentFields={showRentFields}
               showVillaFields={showVillaFields}
             />
 
-            {/* Location Information */}
+            <hr className="my-6" />
+
+            {/* --- Location Information --- */}
             <LocationInfoCard control={form.control} />
 
-            {/* Facilities */}
+            <hr className="my-6" />
+
+            {/* --- Facilities --- */}
             <FacilitiesCard
               control={form.control}
               watch={form.watch}
               setValue={form.setValue}
             />
 
-            {/* Developer & Owner Information */}
+            <hr className="my-6" />
+
+            {/* --- Developer & Owner Information --- */}
             <DeveloperOwnerInfoCard control={form.control} />
-            {watchedListingType === "primary" && (
-              <PaymentPlanCard form={form} />
-            )}
-            {/* Rent Details (only for rent listing type) */}
+
+            <hr className="my-6" />
+
+            {/* --- Payment Plan (Primary Listing Only) --- */}
+            {watchedListingType === "primary" && <PaymentPlanCard show control={form.control} />}
+
+            {/* --- Rent Details (Rent Listing Only) --- */}
             {showRentFields && (
               <Card>
                 <CardHeader>
@@ -289,47 +367,60 @@ export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
                         <FormItem className="space-y-2">
                           <FormLabel>Deposit (EGP)</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="0" {...field} />
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              value={field.value ?? ""} // Use nullish coalescing for better handling of undefined/null
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Number(e.target.value)
+                                )
+                              }
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
+                    {/* Checkbox: Utilities Included */}
                     <FormField
                       control={form.control}
                       name="rentDetails.utilitiesIncluded"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={field.onChange}
+                            <Checkbox
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
                             <FormLabel>Utilities Included</FormLabel>
                           </div>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
 
+                    {/* Checkbox: Furnished */}
                     <FormField
                       control={form.control}
                       name="rentDetails.furnished"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={field.onChange}
+                            <Checkbox
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
                             <FormLabel>Furnished</FormLabel>
                           </div>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -338,18 +429,56 @@ export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
               </Card>
             )}
 
-            {/* Media Upload Section */}
+            <hr className="my-6" />
+
+            {/* --- Media Upload Section --- */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Property Media</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Existing Images */}
+                {isEditing && existingImages.length > 0 && (
+                  <div className="mb-6">
+                    <FormLabel className="mb-2 block font-semibold">
+                      Existing Images
+                    </FormLabel>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {existingImages.map((img, index) => (
+                        <div key={index} className="relative group rounded-lg overflow-hidden shadow-sm">
+                          <img
+                            src={img}
+                            alt={`Existing image ${index + 1}`}
+                            className="w-full h-32 object-cover transition-opacity duration-300 group-hover:opacity-80"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 py-0"
+                            onClick={() => handleImageRemoval(index)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-3">
+                      Images removed here will be deleted from the server upon saving the changes.
+                    </p>
+                  </div>
+                )}
+
+                {/* New Images Upload */}
                 <FormField
                   control={form.control}
                   name="media.images"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Images *</FormLabel>
+                      <FormLabel>
+                        {isEditing ? "Add New Images" : "Images"}
+                        {!isEditing && <span className="text-red-500"> *</span>}
+                      </FormLabel>
                       <Suspense
                         fallback={
                           <div className="space-y-4">
@@ -372,12 +501,49 @@ export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
                   )}
                 />
 
+                <hr className="my-6" />
+
+                {/* Existing Floor Plans */}
+                {isEditing && existingFloorPlans.length > 0 && (
+                  <div className="mb-6">
+                    <FormLabel className="mb-2 block font-semibold">
+                      Existing Floor Plans
+                    </FormLabel>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {existingFloorPlans.map((plan, index) => (
+                        <div key={index} className="relative group rounded-lg overflow-hidden border">
+                          <img
+                            src={plan}
+                            alt={`Existing floor plan ${index + 1}`}
+                            className="w-full h-48 object-contain bg-gray-50 p-2 transition-opacity duration-300 group-hover:opacity-80"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 py-0"
+                            onClick={() => handleFloorPlanRemoval(index)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-3">
+                      Floor plans removed here will be deleted from the server upon saving the changes.
+                    </p>
+                  </div>
+                )}
+
+                {/* New Floor Plans Upload */}
                 <FormField
                   control={form.control}
                   name="media.floorPlans"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Floor Plans</FormLabel>
+                      <FormLabel>
+                        {isEditing ? "Add New Floor Plans" : "Floor Plans"}
+                      </FormLabel>
                       <Suspense
                         fallback={
                           <div className="space-y-4">
@@ -402,15 +568,21 @@ export function PropertyForm({ onClose, isOpen }: PropertyFormProps) {
               </CardContent>
             </Card>
 
-            {/* Form Actions */}
-            <div className="flex items-center justify-end pt-6 border-t">
+            {/* --- Form Actions --- */}
+            <div className="flex items-center justify-end pt-6 border-t mt-8">
               <div className="flex items-center gap-3">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
                   <Save className="mr-2 h-4 w-4" />
-                  {isSubmitting ? "Creating..." : "Create Property"}
+                  {isSubmitting
+                    ? isEditing
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditing
+                      ? "Update Property"
+                      : "Create Property"}
                 </Button>
               </div>
             </div>
